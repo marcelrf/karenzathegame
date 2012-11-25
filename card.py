@@ -267,11 +267,26 @@ def create_graph(cards):
         print edge_count
     return graph
 
-def print_graph(graph, file_name='cards.png'):
-    dot = write(graph)
-    gvv = gv.readstring(dot)
-    gv.layout(gvv, 'dot')
-    gv.render(gvv, 'png', file_name)
+def related_cards(base_cards, graph):
+    iterations = 4
+    frequency_table = collections.defaultdict(lambda: 0)
+    for base_card in base_cards:
+        frequency_table[base_card] += 1
+    new_base_cards = []
+    for i in range(iterations):
+        for base_card in base_cards:
+            for neighbor in graph.neighbors(base_card):
+                if frequency_table[neighbor] == 0:
+                    new_base_cards.append(neighbor)
+                frequency_table[neighbor] += 1
+        base_cards = new_base_cards
+    return frequency_table
+
+# def print_graph(graph, file_name='cards.png'):
+#     dot = write(graph)
+#     gvv = gv.readstring(dot)
+#     gv.layout(gvv, 'dot')
+#     gv.render(gvv, 'png', file_name)
 
 if __name__ == '__main__':
     all_cards = get_all_cards()
@@ -283,6 +298,15 @@ if __name__ == '__main__':
     print_power_histogram(all_cards, Card.TYPE_ATTACK)
     print "Defense power histogram:"
     print_power_histogram(all_cards, Card.TYPE_ATTACK)
-    for card in all_cards: print card
+    # for card in all_cards: print card
     graph = create_graph(all_cards)
-    # print_graph(graph)
+
+    base_attack = Card()
+    base_attack.type = Card.TYPE_ATTACK
+    base_attack.feet = [Card.NO_FOOT, Card.NO_FOOT, Card.LEFT_FOOT, Card.NO_FOOT, Card.RIGHT_FOOT]
+    base_attack.sword = [Card.SWORD_ORG, Card.NO_SWORD, Card.SWORD_DST, Card.NO_SWORD, Card.NO_SWORD]
+    frequency_table = related_cards([base_attack], graph)
+    selected_deck = [x for x in frequency_table.iteritems()]
+    selected_deck.sort(key=lambda x: -x[1])
+    selected_deck = map(lambda x: x[0], selected_deck)
+    for card in selected_deck[0:20]: print card
