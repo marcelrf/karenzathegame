@@ -52,20 +52,23 @@ class Card(object):
         self.sword = [self.NO_SWORD for i in range(5)]
         self.type = self.NO_TYPE
 
+    def __eq__(self, other):
+        return (self.feet == other.feet and
+                self.sword == other.sword and
+                self.type == other.type)
+
     def __str__(self):
         foot_texts = ['L', 'R', '·']
         sword_texts = ['O', 'X', ' ']
         card_type_texts = ['Attack', 'Defense', 'Unknown']
         text = "===============\n"
         text += "Type: %s\n" % card_type_texts[self.type]
-        # text += "Sword power: %f\n" % self.sword_power()
-        # text += "Guard power: %f\n" % self.guard_power()
         text += "Power: %f\n" % self.power()
         text += "---------------\n"
         text += "       %s\n" % foot_texts[self.feet[4]]
         text += "   %s       %s\n" % (
-            sword_texts[self.sword[0]],
             sword_texts[self.sword[4]],
+            sword_texts[self.sword[0]],
         )
         text += " %s           %s\n" % (
             foot_texts[self.feet[3]],
@@ -73,8 +76,8 @@ class Card(object):
         )
         text += "\n"
         text += "  %s         %s\n" % (
-            sword_texts[self.sword[1]],
             sword_texts[self.sword[3]],
+            sword_texts[self.sword[1]],
         )
         text += "   %s   %s   %s\n" % (
             foot_texts[self.feet[2]],
@@ -174,7 +177,7 @@ class Card(object):
                 indices.add(i)
         return indices
 
-    def continues_to(self, card, max_distance):
+    def distance_to(self, card):
         a, b = self, card
         a_left_foot = a.foot_indices(self.LEFT_FOOT)
         b_left_foot = b.foot_indices(self.LEFT_FOOT)
@@ -199,6 +202,10 @@ class Card(object):
             a_left_foot == b_right_foot and
             a_right_foot == b_left_foot):
             distance += 1
+        return distance
+
+    def continues_to(self, card, max_distance):
+        distance = self.distance_to(card)
         return distance <= max_distance
 
 
@@ -248,39 +255,37 @@ def print_power_histogram(cards, type=None):
         print
         slot += pow(0.1, granularity)
 
-def create_graph(cards):
-    max_distance = 1
-    graph = digraph()
-    print "adding %d nodes" % len(cards)
-    for card in cards:
-        graph.add_node(card)
-    print "adding edges"
-    for i in range(len(cards)):
-        print i,
-        edge_count = 0
-        for j in range(len(cards)):
-            if i != j:
-                i_card, j_card = cards[i], cards[j]
-                if i_card.continues_to(j_card, max_distance):
-                    graph.add_edge((i_card, j_card))
-                    edge_count += 1
-        print edge_count
-    return graph
+# def create_graph(cards):
+#     max_distance = 1
+#     graph = digraph()
+#     for card in cards:
+#         graph.add_node(card)
+#     for i in range(len(cards)):
+#         edge_count = 0
+#         for j in range(len(cards)):
+#             if i != j:
+#                 i_card, j_card = cards[i], cards[j]
+#                 if i_card.continues_to(j_card, max_distance):
+#                     graph.add_edge((i_card, j_card))
+#                     edge_count += 1
+#     return graph
 
-def related_cards(base_cards, graph):
-    iterations = 4
-    frequency_table = collections.defaultdict(lambda: 0)
-    for base_card in base_cards:
-        frequency_table[base_card] += 1
-    new_base_cards = []
-    for i in range(iterations):
-        for base_card in base_cards:
-            for neighbor in graph.neighbors(base_card):
-                if frequency_table[neighbor] == 0:
-                    new_base_cards.append(neighbor)
-                frequency_table[neighbor] += 1
-        base_cards = new_base_cards
-    return frequency_table
+# def related_cards(base_cards, graph):
+#     iterations = 5
+#     frequency_table = {}
+#     for base_card in base_cards:
+#         frequency_table[base_card] = 1
+#     new_base_cards = []
+#     for i in range(iterations):
+#         for base_card in base_cards:
+#             for neighbor in graph.neighbors(base_card):
+#                 if not frequency_table.has_key(neighbor):
+#                     frequency_table[neighbor] = 0
+#                     new_base_cards.append(neighbor)
+#                 else:
+#                     frequency_table[neighbor] += 1
+#         base_cards = new_base_cards
+#     return frequency_table
 
 # def print_graph(graph, file_name='cards.png'):
 #     dot = write(graph)
@@ -288,25 +293,51 @@ def related_cards(base_cards, graph):
 #     gv.layout(gvv, 'dot')
 #     gv.render(gvv, 'png', file_name)
 
+def decorate_with_distance(base_card, all_cards):
+    all_cards_with_distance = [[base_card, 1]]
+    for card in all_cards:
+        distance = base_card.distance_to(card)
+        all_cards_with_distance.append([card, distance])
+    return all_cards_with_distance
+
 if __name__ == '__main__':
     all_cards = get_all_cards()
-    all_cards.sort(key=lambda x: 10 - x.power())
-    print "Number of cards: %d" % len(all_cards)
-    print "Number of attacks: %d" % len(filter(lambda x: x.type == Card.TYPE_ATTACK, all_cards))
-    print "Number of defenses: %d" % len(filter(lambda x: x.type == Card.TYPE_DEFENSE, all_cards))
-    print "Attack power histogram:"
-    print_power_histogram(all_cards, Card.TYPE_ATTACK)
-    print "Defense power histogram:"
-    print_power_histogram(all_cards, Card.TYPE_ATTACK)
+    # all_cards.sort(key=lambda x: 10 - x.power())
+    # print "Number of cards: %d" % len(all_cards)
+    # print "Number of attacks: %d" % len(filter(lambda x: x.type == Card.TYPE_ATTACK, all_cards))
+    # print "Number of defenses: %d" % len(filter(lambda x: x.type == Card.TYPE_DEFENSE, all_cards))
+    # print "Attack power histogram:"
+    # print_power_histogram(all_cards, Card.TYPE_ATTACK)
+    # print "Defense power histogram:"
+    # print_power_histogram(all_cards, Card.TYPE_ATTACK)
     # for card in all_cards: print card
-    graph = create_graph(all_cards)
 
     base_attack = Card()
     base_attack.type = Card.TYPE_ATTACK
-    base_attack.feet = [Card.NO_FOOT, Card.NO_FOOT, Card.LEFT_FOOT, Card.NO_FOOT, Card.RIGHT_FOOT]
-    base_attack.sword = [Card.SWORD_ORG, Card.NO_SWORD, Card.SWORD_DST, Card.NO_SWORD, Card.NO_SWORD]
-    frequency_table = related_cards([base_attack], graph)
-    selected_deck = [x for x in frequency_table.iteritems()]
-    selected_deck.sort(key=lambda x: -x[1])
-    selected_deck = map(lambda x: x[0], selected_deck)
-    for card in selected_deck[0:20]: print card
+    base_attack.feet[3] = Card.LEFT_FOOT
+    base_attack.feet[0] = Card.RIGHT_FOOT
+    base_attack.sword[1] = Card.SWORD_ORG
+    base_attack.sword[3] = Card.SWORD_DST
+    base_attack = filter(lambda x: x == base_attack, all_cards)[0]
+
+    all_cards_with_distance = decorate_with_distance(base_attack, all_cards)
+    while len(all_cards_with_distance) > 20:
+        for i in range(len(all_cards_with_distance)):
+            base_card = all_cards_with_distance[i][0]
+            for j in range(len(all_cards_with_distance)):
+                card = all_cards_with_distance[j][0]
+                all_cards_with_distance[i][1] += base_card.distance_to(card)
+        all_cards_with_distance.sort(key=lambda x: x[1] - x[0].power() * 70)
+        all_cards_with_distance = all_cards_with_distance[0:max(len(all_cards_with_distance)/2,20)]
+
+    for card, distance in all_cards_with_distance:
+        print card
+        # print distance
+
+    # graph = create_graph(all_cards)
+    # frequency_table = related_cards([base_attack], graph)
+    # selected_deck = [x for x in frequency_table.iteritems()]
+    # selected_deck.sort(key=lambda x: -x[1])
+    # for card, freq in selected_deck[0:20]:
+    #     print card
+    #     print freq
