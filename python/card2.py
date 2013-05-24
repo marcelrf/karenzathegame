@@ -13,6 +13,10 @@ SHORT, LONG = range(2)
 REGULAR, INVERSE = range(2)
 ALIGNED, SEMI_ALIGNED, NOT_ALIGNED = range(3)
 
+MAX_DECK_POWER = 0
+MAX_DECK_COHESION = 0
+MAX_DECK_FACTOR = 0
+
 class Card(object):
 
     def __init__(self):
@@ -78,14 +82,13 @@ class Card(object):
         total = 0
         if self.type == TYPE_ATTACK:
             total += 5 - self.guard_position
-            total += 1 if self.guard_orientation == INVERSE else 0
         else:
             total += self.guard_position + 1
-            total += 1 if self.guard_orientation == REGULAR else 0
         total += 3 - self.sword_direction
         if self.trajectory_length == LONG: total += 2
         total += 4 - self.sword_guard_alignment * 2
-        return total / 15.0
+        if self.guard_orientation == REGULAR: total += 3
+        return total / 17.0
 
     def _sword_direction(self):
         if SWORD_ORG in [self.sword[0], self.sword[4]]:
@@ -183,7 +186,7 @@ class Card(object):
         return distance / 3.0
 
 def get_all_cards():
-    all_cards = []
+    all_cards = {TYPE_ATTACK: [], TYPE_DEFENSE: []}
     for type in [TYPE_ATTACK, TYPE_DEFENSE]:
         for left_foot in range(5):
             for right_foot in range(5):
@@ -198,79 +201,120 @@ def get_all_cards():
                                 c.sword[sword_org] = SWORD_ORG
                                 c.sword[sword_dst] = SWORD_DST
                                 c.set_auto_values()
-                                all_cards.append(c)
+                                all_cards[type].append(c)
     return all_cards
 
-def get_power_mean(cards):
+def get_power_mean(deck):
     total = 0
-    for card in cards:
+    for card in deck:
         total += card.power
-    return float(total) / len(cards)
+    return float(total) / len(deck)
+
+def get_cohesion(deck):
+    feet_count = [0, 0, 0, 0, 0]
+    for card in deck:
+        for i in range(5):
+            if card.feet[i] == RIGHT_FOOT:
+                feet_count[i] += 1
+            elif card.feet[i] == LEFT_FOOT:
+                feet_count[i] -= 1
+    feet_count = map(lambda x: x*x, feet_count)
+    feet_cohesion = sum(feet_count) / 800.0
+    sword_count = [0, 0, 0, 0, 0]
+    for card in deck:
+        for i in range(5):
+            if card.sword[i] == SWORD_ORG:
+                sword_count[i] += 1
+            elif card.sword[i] == SWORD_DST:
+                sword_count[i] -= 1
+    sword_count = map(lambda x: abs(x), sword_count)
+    sword_cohesion = 1 - sum(sword_count) / 80.0
+    return feet_cohesion * sword_cohesion
+    # distance = 0
+    # for card1 in deck:
+    #     for card2 in deck:
+    #         distance += card1.distance_to(card2)
+    # return 1 - (distance / 400.0)
+
+def get_inverse_cohesion(deck):
+    inverted_count = 0
+    for card in deck:
+        if card.guard_orientation == INVERSE:
+            inverted_count += 1
+    inverted_cohesion = pow(1 - inverted_count / 20.0, 5)
+    return inverted_cohesion
+
+def get_deck_factor(deck):
+    global MAX_DECK_POWER, MAX_DECK_COHESION, MAX_DECK_FACTOR
+    power = get_power_mean(deck)
+    cohesion = get_cohesion(deck)
+    inverse = get_inverse_cohesion(deck)
+    factor = power * cohesion * inverse
+    if power > MAX_DECK_POWER: MAX_DECK_POWER = power
+    if cohesion > MAX_DECK_COHESION: MAX_DECK_COHESION = cohesion
+    if factor > MAX_DECK_FACTOR: MAX_DECK_FACTOR = factor
+    return factor
 
 def get_power_histogram(decks):
-    freqs = collections.defaultdict(lambda: 0)
+    freqs = {
+        TYPE_ATTACK: collections.defaultdict(lambda: 0),
+        TYPE_DEFENSE: collections.defaultdict(lambda: 0)
+    }
     for deck in decks:
         for card in deck[0]:
-            freqs[card] += 1
-    return list(freqs.iteritems())
+            freqs[card.type][card] += 1
+    freqs[TYPE_ATTACK] = list(freqs[TYPE_ATTACK].iteritems())
+    freqs[TYPE_DEFENSE] = list(freqs[TYPE_DEFENSE].iteritems())
+    freqs[TYPE_ATTACK].sort(key=lambda x: x[1], reverse=True)
+    freqs[TYPE_DEFENSE].sort(key=lambda x: x[1], reverse=True)
+    return {
+        TYPE_ATTACK: map(lambda x: x[0], freqs[TYPE_ATTACK]),
+        TYPE_DEFENSE: map(lambda x: x[0], freqs[TYPE_DEFENSE])
+    }
 
-def get_distance(deck):
-    distance = 0
-    for card1 in deck:
-        for card2 in deck:
-            distance += card1.distance_to(card2)
-    return distance / 400.0
-
-def get_proportion(deck):
-    attacks = 0
-    defenses = 0
-    for card in deck:
-        if card.type == TYPE_ATTACK: attacks += 1
-        if card.type == TYPE_DEFENSE: defenses += 1
-    return 1 - abs(attacks - defenses) / 20.0
-
-def sort_by_heuristic(cards):
+def sort_by_heuristic(cards, make_histogram=True):
     decks = []
-    for i in range(10000):
+    for i in range(100000):
         deck = []
-        for j in range(20):
-            card_index = int(random.random() * len(cards))
-            deck.append(cards[card_index])
-        power = get_power_mean(deck)
-        distance = get_distance(deck)
-        proportion = get_proportion(deck)
-        decks.append((deck, power * (1 - distance) * proportion))
+        selected_attacks, selected_defenses = [None], [None]
+        attack_index, defense_index = None, None
+        for j in range(10):
+            while attack_index in selected_attacks:
+                attack_index = int(random.random() * len(cards[TYPE_ATTACK]))
+            selected_attacks.append(attack_index)
+            deck.append(cards[TYPE_ATTACK][attack_index])
+            while defense_index in selected_defenses:
+                defense_index = int(random.random() * len(cards[TYPE_DEFENSE]))
+            selected_defenses.append(defense_index)
+            deck.append(cards[TYPE_DEFENSE][defense_index])
+        factor = get_deck_factor(deck)
+        decks.append((deck, factor))
     decks.sort(key=lambda x: x[1], reverse=True)
-    hist = get_power_histogram(decks[:5000])
-    hist.sort(key=lambda x: x[1], reverse=True)
-    return map(lambda x: x[0], hist)
+    if make_histogram:
+        hist = get_power_histogram(decks[:50000])
+        return hist
+    else: return decks
+
+def crop_card_set(cards, threshold):
+    return {
+        TYPE_ATTACK: cards[TYPE_ATTACK][:threshold],
+        TYPE_DEFENSE: cards[TYPE_DEFENSE][:threshold]
+    }
 
 if __name__ == '__main__':
     all_cards = get_all_cards()
     cards1 = sort_by_heuristic(all_cards)
-    print '.'
-    cards2 = sort_by_heuristic(cards1[:700])
-    print '.'
-    cards3 = sort_by_heuristic(cards2[:600])
-    print '.'
-    cards4 = sort_by_heuristic(cards3[:500])
-    print '.'
-    cards5 = sort_by_heuristic(cards4[:400])
-    print '.'
-    cards6 = sort_by_heuristic(cards5[:300])
-    print '.'
-    cards7 = sort_by_heuristic(cards6[:200])
-    print '.'
-    cards8 = sort_by_heuristic(cards7[:100])
-    print '.'
-    cards9 = sort_by_heuristic(cards8[:50])
-    print '.'
-    cards10 = sort_by_heuristic(cards9[:20])
+    cards2 = sort_by_heuristic(crop_card_set(cards1, 350))
+    cards3 = sort_by_heuristic(crop_card_set(cards2, 300))
+    cards4 = sort_by_heuristic(crop_card_set(cards3, 250))
+    cards5 = sort_by_heuristic(crop_card_set(cards4, 200))
+    cards6 = sort_by_heuristic(crop_card_set(cards5, 150))
+    deck = sort_by_heuristic(crop_card_set(cards6, 100), False)[0][0]
 
-    print get_power_mean(cards10)
-    print get_distance(cards10)
-    print get_proportion(cards10)
-    for card in cards10: print card
+    print get_power_mean(deck), MAX_DECK_POWER
+    print get_cohesion(deck), MAX_DECK_COHESION
+    print get_power_mean(deck) * get_cohesion(deck), MAX_DECK_FACTOR
+    for card in deck: print card
     
     # c = Card()
     # c.type = TYPE_ATTACK
