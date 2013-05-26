@@ -1,4 +1,4 @@
-# coding: UTF-8
+# coding: utf-8
 
 import random
 
@@ -39,6 +39,9 @@ TRAJECTORY_ANGLES = {
     S4: {S1: 144, S2: 108, S3: 0, S5: 36},
     S5: {S1: 108, S2: 72, S3: 144, S4: 36},
 }
+
+FEET_POSITIONS = [FA, FB, FC, FD, FE]
+SWORD_POSITIONS = [S1, S2, S3, S4, S5]
 
 class Card(object):
 
