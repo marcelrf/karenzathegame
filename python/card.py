@@ -46,8 +46,6 @@ SWORD_POSITIONS = [S1, S2, S3, S4, S5]
 class Card(object):
 
     def __init__(self):
-        self.name = ''
-        self.image = None
         self.type = NO_TYPE
         self.power = 0
         self.feet = [NO_FOOT for i in range(5)]
@@ -55,8 +53,6 @@ class Card(object):
 
     def __copy__(self):
         other = Card()
-        other.name = self.name
-        other.image = self.image
         other.type = self.type
         other.power = self.power
         other.feet = list(self.feet)
@@ -65,8 +61,6 @@ class Card(object):
 
     def __eq__(self, other):
         return (
-            self.name == other.name and
-            self.image == other.image and
             self.type == other.type and
             self.power == other.power and
             self.feet == other.feet and
@@ -90,7 +84,6 @@ class Card(object):
             NO_SWORD: ' ',
         }
         text  = ".-------------.\n"
-        text += "| %s |\n"
         text += "| %s (%d) |\n"
         text += "|      %s      |\n"
         text += "|   %s     %s   |\n"
@@ -98,11 +91,7 @@ class Card(object):
         text += "|  %s       %s  |\n"
         text += "|   %s  %s  %s   |\n"
         text += "'-------------'"
-        if self.name == '':
-            name_text = 'No name    '
-        else: name_text = self.name[:11].ljust(11)
         instantiation = (
-            name_text,
             type_codes[self.type],
             self.power,
             foot_codes[self.feet[FA]],
@@ -179,8 +168,6 @@ class Card(object):
                 self.sword[i] = NO_SWORD
 
     def random(self):
-        self.name = ''
-        self.image = None
         self.type = random.randint(1, 2)
         self.power = random.randint(1, 9)
         feet_choices = range(5)

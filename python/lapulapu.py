@@ -3,6 +3,7 @@
 from card import *
 from deck import *
 from generator import *
+from renderer import *
 
 def card_heuristic(card):
 	# must return int between 1 and 9 (both included)
@@ -20,5 +21,5 @@ def deck_heuristic(deck):
 	distance = 1 - deck.mean_distance() / 4.0
 	return power * distance
 
-deck = generate(card_heuristic, deck_heuristic)
-print_deck(deck)
+deck = generate(20, card_heuristic, deck_heuristic)
+print to_text(deck)

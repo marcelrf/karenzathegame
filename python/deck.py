@@ -6,20 +6,16 @@ from copy import copy
 class Deck(object):
 
     def __init__(self):
-        self.name = ''
         self.cards = []
 
     def __copy__(self):
         other = Deck()
-        other.name = self.name
         other.cards = []
         for card in self.cards:
             other.cards.append(copy(card))
         return other
 
     def __eq__(self, other):
-        if self.name != other.name:
-            return False
         for card in self.cards:
             if card not in other.cards:
                 return False
@@ -29,11 +25,7 @@ class Deck(object):
         return True
 
     def __str__(self):
-        if self.name == '':
-            name_text = 'No name'
-        else: name_text = self.name
         text  = "===============\n"
-        text += " " + name_text + "\n"
         for card in self.cards:
             text += str(card) + "\n"
         text += "==============="

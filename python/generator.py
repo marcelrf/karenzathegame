@@ -9,17 +9,17 @@ from deck import *
 ITERATIONS = 10
 EXCLUDED_PER_ITERATION = 50
 DECK_SAMPLES = 1000
-DECK_SIZE = 20
+CHOSEN_SAMPLES = 500
 
-def generate(card_heuristic, deck_heuristic):
+def generate(deck_size, card_heuristic, deck_heuristic):
     cards = get_all_cards(card_heuristic)
     for i in range(ITERATIONS):
         log_iteration(i, cards)
-        decks = get_random_decks(cards, DECK_SAMPLES, DECK_SIZE / 2)
+        decks = get_random_decks(cards, DECK_SAMPLES, deck_size / 2)
         sorted_decks = get_sorted_decks(decks, deck_heuristic)
-        sorted_cards = get_sorted_cards(sorted_decks)
+        sorted_cards = get_sorted_cards(sorted_decks[:CHOSEN_SAMPLES])
         cards = exclude_worse_cards(sorted_cards, EXCLUDED_PER_ITERATION / 2)
-    decks = get_random_decks(cards, DECK_SAMPLES, DECK_SIZE / 2)
+    decks = get_random_decks(cards, DECK_SAMPLES, deck_size / 2)
     sorted_decks = get_sorted_decks(decks, deck_heuristic)
     return sorted_decks[0]
 
@@ -87,18 +87,3 @@ def log_iteration(i, cards):
         "iteration %d: %d cards\n" %
         (i + 1, len(cards[ATTACK]) + len(cards[DEFENSE]))
     )
-
-def print_deck(deck):
-    cards = list(deck.cards)
-    while len(cards) > 0:
-        line_cards = cards[:5]
-        card_texts = map(lambda x: str(x).split("\n"), line_cards)
-        while len(card_texts[0]) > 0:
-            for i in range(5):
-                print card_texts[i].pop(0),
-            print
-        cards = cards[5:]
-    print "Mean power: %f" % deck.mean_power()
-    print "Power deviation: %f" % deck.power_deviation()
-    print "Mean distance: %f" % deck.mean_distance()
-    print "Distance deviation: %f" % deck.distance_deviation()
