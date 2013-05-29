@@ -24,13 +24,15 @@ def to_text(element):
         return text
     else: return None
 
-def to_html(element):
+def to_html(element, style=True):
     if isinstance(element, Card):
         card = element
+        card_types = [None, 'attack', 'defense']
         feet_classes = ['fa', 'fb', 'fc', 'fd', 'fe']
+        sword_classes = ['s1', 's2', 's3', 's4', 's5']
         text = """
              <div class="card">
-                <div class="type">
+                <div class="type %s">
                     <div class="power">%d</div>
                 </div>
                 <div class="miniature">
@@ -38,7 +40,7 @@ def to_html(element):
                 </div>
                 <div class="name">FIGHTER - CARD NAME</div>
                 <div class="drawing">
-                    <img src="../images/fighter.png" />
+                    <!--img src="../images/fighter.png" /-->
                 </div>
                 <div class="requisite"></div>
                 <div class="foot %s">
@@ -47,13 +49,41 @@ def to_html(element):
                 <div class="foot %s">
                     <img src="../images/right_foot.png" />
                 </div>
-            </table>
+                <div class="sword %s">
+                    <img src="../images/sword.png" />
+                </div>
+                <div class="min-foot red %s">&#9679;</div>
+                <div class="min-foot green %s">&#9679;</div>
+                <div class="min-sword blue %s">&#9679;</div>
+                <div class="trajectory %s-%s"></div>
+                <div class="min-trajectory %s-%s"></div>
+            </div>
         """ % (
+            card_types[card.type],
             card.power,
             feet_classes[card.left_foot],
             feet_classes[card.right_foot],
+            sword_classes[card.sword_origin],
+            feet_classes[card.left_foot],
+            feet_classes[card.right_foot],
+            sword_classes[card.sword_origin],
+            sword_classes[card.sword_origin],
+            sword_classes[card.sword_destiny],
+            sword_classes[card.sword_origin],
+            sword_classes[card.sword_destiny],
         )
-        return CARD_STYLE + text
+        if style: text = CARD_STYLE + text
+        return text
+    elif isinstance(element, Deck):
+        deck = element
+        text = '<table cellspacing="0" cellpadding="0">'
+        for i in range(len(deck.cards)):
+            if i % 3 == 0: text += "<tr>"
+            text += "<td>" + to_html(deck.cards[i], False) + "</td>"
+            if i % 3 == 2: text += "</tr>"
+        text += "</table>"
+        if style: text = DECK_STYLE + CARD_STYLE + text
+        return text
 
 CARD_STYLE = """
 <style>
@@ -65,19 +95,23 @@ CARD_STYLE = """
     position: relative;
 }
 .type {
-    width: 0.9cm;
-    height: 0.9cm;
-    border: 0.03cm solid lightgray;
-    border-radius: 0.9cm 0.9cm 0.9cm 0.9cm;
+    width: 1cm;
+    height: 1cm;
     position: absolute;
-    left: 0.25cm;
+    left: 0.19cm;
     top: 0.35cm;
+}
+.type.attack {
+    background-image: url('../images/attack.png');
+}
+.type.defense {
+    background-image: url('../images/defense.png');
 }
 .type .power {
     font-family: Impact;
     font-size: 0.5cm;
-    color: gray;
-    margin: 0.15cm 0 0 0.3cm;
+    color: purple;
+    margin: 0.2cm 0 0 0.4cm;
 }
 .miniature {
     width: 0.9cm;
@@ -94,8 +128,6 @@ CARD_STYLE = """
     -moz-transform: rotate(-90deg);  /* FF3.5+ */
     -o-transform: rotate(-90deg);  /* Opera 10.5 */
     -webkit-transform: rotate(-90deg);  /* Saf3.1+, Chrome */
-    filter:  progid:DXImageTransform.Microsoft.BasicImage(rotation=1.57);  /* IE6,IE7 */
-    -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=1.57)"; /* IE8 */
     width: 6.4cm;
     height: 1cm;
     font-family: Impact;
@@ -110,14 +142,15 @@ CARD_STYLE = """
     width: 4.6cm;
     border: 0.03cm solid lightgray;
     border-radius: 0.3cm;
+    background-color: lightgray;
     position: absolute;
     left: 1.35cm;
     top: 0.35cm;
 }
 .drawing img {
     height: 3.8cm;
-    width: 4cm;
-    margin: 0 0 0 0.3cm;
+    width: 4.6cm;
+    opacity: 0.7;
 }
 .requisite {
     height: 4.2cm;
@@ -136,30 +169,243 @@ CARD_STYLE = """
     width: 1cm;
     height: 1cm;
 }
-.foot.fa {
-    left: 3.115cm;
-    top: 4.435cm;
+.foot.fa { left: 3.115cm; top: 4.435cm; }
+.foot.fb { left: 1.54cm; top: 5.55cm; }
+.foot.fc { left: 4.7cm; top: 5.55cm; }
+.foot.fd { left: 2.13cm; top: 7.4cm; }
+.foot.fe { left: 4.12cm; top: 7.4cm; }
+.sword {
+    width: 0.9cm;
+    height: 0.9cm;
+    position: absolute;
 }
-.foot.fb {
-    left: 1.54cm;
-    top: 5.55cm;
+.sword img {
+    width: 1cm;
+    height: 1cm;
 }
-.foot.fc {
-    left: 4.7cm;
-    top: 5.55cm;
+.sword.s1 { left: 2.19cm; top: 4.82cm; }
+.sword.s2 { left: 4.06cm; top: 4.82cm; }
+.sword.s3 { left: 1.6cm; top: 6.55cm; }
+.sword.s4 { left: 4.65cm; top: 6.55cm; }
+.sword.s5 { left: 3.15cm; top: 7.64cm; }
+.min-foot {
+    position: absolute;
 }
-.foot.fd {
-    left: 2.13cm;
-    top: 7.4cm;
+.min-foot.fa { left: 0.6cm; top: 1.25cm; }
+.min-foot.fb { left: 0.23cm; top: 1.53cm; }
+.min-foot.fc { left: 0.993cm; top: 1.53cm; }
+.min-foot.fd { left: 0.38cm; top: 1.97cm; }
+.min-foot.fe { left: 0.85cm; top: 1.97cm; }
+.min-sword {
+    position: absolute;
 }
-.foot.fe {
-    left: 4.12cm;
-    top: 7.4cm;
+.min-sword.s1 { left: 0.36cm; top: 1.33cm; }
+.min-sword.s2 { left: 0.85cm; top: 1.33cm; }
+.min-sword.s3 { left: 0.25cm; top: 1.75cm; }
+.min-sword.s4 { left: 0.99cm; top: 1.75cm; }
+.min-sword.s5 { left: 0.6cm; top: 2cm; }
+.red {
+    color: red;
+}
+.green {
+    color: green;
+}
+.blue {
+    color: blue;
+}
+.trajectory,
+.min-trajectory {
+    background-repeat: no-repeat;
+    position: absolute;
+}
+.trajectory {
+    width: 5cm;
+    height: 5cm;
+    opacity: 0.5;
+}
+.min-trajectory {
+    width: 1cm;
+    height: 1cm;
+    opacity: 0.8;
+}
+.trajectory.s1-s2,
+.trajectory.s2-s1 {
+    background-image: url('../images/short.png');
+    -moz-transform: rotate(72deg);  /* FF3.5+ */
+    -o-transform: rotate(72deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(72deg);  /* Saf3.1+, Chrome */
+    left: 0.6cm;
+    top: 4.74cm;
+}
+.trajectory.s1-s3,
+.trajectory.s3-s1 {
+    background-image: url('../images/short.png');
+    left: 1.6cm;
+    top: 4.74cm;
+}
+.trajectory.s1-s4,
+.trajectory.s4-s1 {
+    background-image: url('../images/long.png');
+    -moz-transform: rotate(71deg);  /* FF3.5+ */
+    -o-transform: rotate(71deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(71deg);  /* Saf3.1+, Chrome */
+    left: 0.6cm;
+    top: 4.74cm;
+}
+.trajectory.s1-s5,
+.trajectory.s5-s1 {
+    background-image: url('../images/long.png');
+    -moz-transform: rotate(-72deg);  /* FF3.5+ */
+    -o-transform: rotate(-72deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(-72deg);  /* Saf3.1+, Chrome */
+    left: 1.9cm;
+    top: 3.8cm;
+}
+.trajectory.s2-s3,
+.trajectory.s3-s2 {
+    background-image: url('../images/long.png');
+    left: 1.6cm;
+    top: 4.74cm;
+}
+.trajectory.s2-s4,
+.trajectory.s4-s2 {
+    background-image: url('../images/short.png');
+    -moz-transform: rotate(143deg);  /* FF3.5+ */
+    -o-transform: rotate(143deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(143deg);  /* Saf3.1+, Chrome */
+    left: 0.35cm;
+    top: 3.8cm;
+}
+.trajectory.s2-s5,
+.trajectory.s5-s2 {
+    background-image: url('../images/long.png');
+    -moz-transform: rotate(144deg);  /* FF3.5+ */
+    -o-transform: rotate(144deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(144deg);  /* Saf3.1+, Chrome */
+    left: 0.35cm;
+    top: 3.75cm;
+}
+.trajectory.s3-s4,
+.trajectory.s4-s3 {
+    background-image: url('../images/long.png');
+    -moz-transform: rotate(-144deg);  /* FF3.5+ */
+    -o-transform: rotate(-144deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(-144deg);  /* Saf3.1+, Chrome */
+    left: 1.15cm;
+    top: 3.23cm;
+}
+.trajectory.s3-s5,
+.trajectory.s5-s3 {
+    background-image: url('../images/short.png');
+    -moz-transform: rotate(-73deg);  /* FF3.5+ */
+    -o-transform: rotate(-73deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(-73deg);  /* Saf3.1+, Chrome */
+    left: 1.9cm;
+    top: 3.78cm;
+}
+.trajectory.s4-s5,
+.trajectory.s5-s4 {
+    background-image: url('../images/short.png');
+    -moz-transform: rotate(-144deg);  /* FF3.5+ */
+    -o-transform: rotate(-144deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(-144deg);  /* Saf3.1+, Chrome */
+    left: 1.1cm;
+    top: 3.2cm;
+}
+.min-trajectory.s1-s2,
+.min-trajectory.s2-s1 {
+    background-image: url('../images/min-short.png');
+    -moz-transform: rotate(69deg);  /* FF3.5+ */
+    -o-transform: rotate(69deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(69deg);  /* Saf3.1+, Chrome */
+    left: 0.2cm;
+    top: 1.49cm;
+}
+.min-trajectory.s1-s3,
+.min-trajectory.s3-s1 {
+    background-image: url('../images/short.png');
+    left: 1.6cm;
+    top: 4.74cm;
+}
+.min-trajectory.s1-s4,
+.min-trajectory.s4-s1 {
+    background-image: url('../images/long.png');
+    -moz-transform: rotate(71deg);  /* FF3.5+ */
+    -o-transform: rotate(71deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(71deg);  /* Saf3.1+, Chrome */
+    left: 0.6cm;
+    top: 4.74cm;
+}
+.min-trajectory.s1-s5,
+.min-trajectory.s5-s1 {
+    background-image: url('../images/long.png');
+    -moz-transform: rotate(-72deg);  /* FF3.5+ */
+    -o-transform: rotate(-72deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(-72deg);  /* Saf3.1+, Chrome */
+    left: 1.9cm;
+    top: 3.8cm;
+}
+.min-trajectory.s2-s3,
+.min-trajectory.s3-s2 {
+    background-image: url('../images/long.png');
+    left: 1.6cm;
+    top: 4.74cm;
+}
+.min-trajectory.s2-s4,
+.min-trajectory.s4-s2 {
+    background-image: url('../images/short.png');
+    -moz-transform: rotate(143deg);  /* FF3.5+ */
+    -o-transform: rotate(143deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(143deg);  /* Saf3.1+, Chrome */
+    left: 0.35cm;
+    top: 3.8cm;
+}
+.min-trajectory.s2-s5,
+.min-trajectory.s5-s2 {
+    background-image: url('../images/long.png');
+    -moz-transform: rotate(144deg);  /* FF3.5+ */
+    -o-transform: rotate(144deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(144deg);  /* Saf3.1+, Chrome */
+    left: 0.35cm;
+    top: 3.75cm;
+}
+.min-trajectory.s3-s4,
+.min-trajectory.s4-s3 {
+    background-image: url('../images/long.png');
+    -moz-transform: rotate(-144deg);  /* FF3.5+ */
+    -o-transform: rotate(-144deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(-144deg);  /* Saf3.1+, Chrome */
+    left: 1.15cm;
+    top: 3.23cm;
+}
+.min-trajectory.s3-s5,
+.min-trajectory.s5-s3 {
+    background-image: url('../images/short.png');
+    -moz-transform: rotate(-73deg);  /* FF3.5+ */
+    -o-transform: rotate(-73deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(-73deg);  /* Saf3.1+, Chrome */
+    left: 1.9cm;
+    top: 3.78cm;
+}
+.min-trajectory.s4-s5,
+.min-trajectory.s5-s4 {
+    background-image: url('../images/short.png');
+    -moz-transform: rotate(-144deg);  /* FF3.5+ */
+    -o-transform: rotate(-144deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(-144deg);  /* Saf3.1+, Chrome */
+    left: 1.1cm;
+    top: 3.2cm;
 }
 </style>
 """
 
+DECK_STYLE = """
 
-c = Card()
-c.random()
+"""
+
+
+c = Deck()
+c.random(20)
+c.cards[0].sword_origin = S1
+c.cards[0].sword_destiny = S2
 print to_html(c)
