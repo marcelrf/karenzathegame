@@ -38,9 +38,9 @@ def to_html(element, style=True):
                 <div class="miniature">
                     <img src="../images/board.png" />
                 </div>
-                <div class="name">FIGHTER - CARD NAME</div>
+                <div class="name">Masaru - Card Name</div>
                 <div class="drawing">
-                    <!--img src="../images/fighter.png" /-->
+                    <img src="../images/fighter.png" />
                 </div>
                 <div class="requisite"></div>
                 <div class="foot %s">
@@ -52,8 +52,8 @@ def to_html(element, style=True):
                 <div class="sword %s">
                     <img src="../images/sword.png" />
                 </div>
-                <div class="min-foot red %s">&#9679;</div>
-                <div class="min-foot green %s">&#9679;</div>
+                <div class="min-foot orange %s">&#9679;</div>
+                <div class="min-foot orange %s">&#9679;</div>
                 <div class="min-sword blue %s">&#9679;</div>
                 <div class="trajectory %s-%s"></div>
                 <div class="min-trajectory %s-%s"></div>
@@ -103,14 +103,15 @@ CARD_STYLE = """
 }
 .type.attack {
     background-image: url('../images/attack.png');
+    color: crimson;
 }
 .type.defense {
     background-image: url('../images/defense.png');
+    color: green;
 }
 .type .power {
     font-family: Impact;
     font-size: 0.5cm;
-    color: purple;
     margin: 0.2cm 0 0 0.4cm;
 }
 .miniature {
@@ -134,7 +135,7 @@ CARD_STYLE = """
     font-size: 0.6cm;
     color: gray;
     position: absolute;
-    left: -2.37cm;
+    left: -2.38cm;
     top: 4.7cm;
 }
 .drawing {
@@ -204,11 +205,8 @@ CARD_STYLE = """
 .min-sword.s3 { left: 0.25cm; top: 1.75cm; }
 .min-sword.s4 { left: 0.99cm; top: 1.75cm; }
 .min-sword.s5 { left: 0.6cm; top: 2cm; }
-.red {
-    color: red;
-}
-.green {
-    color: green;
+.orange {
+    color: orange;
 }
 .blue {
     color: blue;
@@ -318,18 +316,18 @@ CARD_STYLE = """
     -moz-transform: rotate(69deg);  /* FF3.5+ */
     -o-transform: rotate(69deg);  /* Opera 10.5 */
     -webkit-transform: rotate(69deg);  /* Saf3.1+, Chrome */
-    left: 0.2cm;
+    left: 0.19cm;
     top: 1.49cm;
 }
 .min-trajectory.s1-s3,
 .min-trajectory.s3-s1 {
-    background-image: url('../images/short.png');
-    left: 1.6cm;
-    top: 4.74cm;
+    background-image: url('../images/min-short.png');
+    left: 0.28cm;
+    top: 1.53cm;
 }
 .min-trajectory.s1-s4,
 .min-trajectory.s4-s1 {
-    background-image: url('../images/long.png');
+    background-image: url('../images/min-long.png');
     -moz-transform: rotate(71deg);  /* FF3.5+ */
     -o-transform: rotate(71deg);  /* Opera 10.5 */
     -webkit-transform: rotate(71deg);  /* Saf3.1+, Chrome */
@@ -338,7 +336,7 @@ CARD_STYLE = """
 }
 .min-trajectory.s1-s5,
 .min-trajectory.s5-s1 {
-    background-image: url('../images/long.png');
+    background-image: url('../images/min-long.png');
     -moz-transform: rotate(-72deg);  /* FF3.5+ */
     -o-transform: rotate(-72deg);  /* Opera 10.5 */
     -webkit-transform: rotate(-72deg);  /* Saf3.1+, Chrome */
@@ -347,13 +345,13 @@ CARD_STYLE = """
 }
 .min-trajectory.s2-s3,
 .min-trajectory.s3-s2 {
-    background-image: url('../images/long.png');
+    background-image: url('../images/min-long.png');
     left: 1.6cm;
     top: 4.74cm;
 }
 .min-trajectory.s2-s4,
 .min-trajectory.s4-s2 {
-    background-image: url('../images/short.png');
+    background-image: url('../images/min-short.png');
     -moz-transform: rotate(143deg);  /* FF3.5+ */
     -o-transform: rotate(143deg);  /* Opera 10.5 */
     -webkit-transform: rotate(143deg);  /* Saf3.1+, Chrome */
@@ -362,7 +360,7 @@ CARD_STYLE = """
 }
 .min-trajectory.s2-s5,
 .min-trajectory.s5-s2 {
-    background-image: url('../images/long.png');
+    background-image: url('../images/min-long.png');
     -moz-transform: rotate(144deg);  /* FF3.5+ */
     -o-transform: rotate(144deg);  /* Opera 10.5 */
     -webkit-transform: rotate(144deg);  /* Saf3.1+, Chrome */
@@ -371,7 +369,7 @@ CARD_STYLE = """
 }
 .min-trajectory.s3-s4,
 .min-trajectory.s4-s3 {
-    background-image: url('../images/long.png');
+    background-image: url('../images/min-long.png');
     -moz-transform: rotate(-144deg);  /* FF3.5+ */
     -o-transform: rotate(-144deg);  /* Opera 10.5 */
     -webkit-transform: rotate(-144deg);  /* Saf3.1+, Chrome */
@@ -380,7 +378,7 @@ CARD_STYLE = """
 }
 .min-trajectory.s3-s5,
 .min-trajectory.s5-s3 {
-    background-image: url('../images/short.png');
+    background-image: url('../images/min-short.png');
     -moz-transform: rotate(-73deg);  /* FF3.5+ */
     -o-transform: rotate(-73deg);  /* Opera 10.5 */
     -webkit-transform: rotate(-73deg);  /* Saf3.1+, Chrome */
@@ -389,7 +387,7 @@ CARD_STYLE = """
 }
 .min-trajectory.s4-s5,
 .min-trajectory.s5-s4 {
-    background-image: url('../images/short.png');
+    background-image: url('../images/min-short.png');
     -moz-transform: rotate(-144deg);  /* FF3.5+ */
     -o-transform: rotate(-144deg);  /* Opera 10.5 */
     -webkit-transform: rotate(-144deg);  /* Saf3.1+, Chrome */
@@ -400,12 +398,4 @@ CARD_STYLE = """
 """
 
 DECK_STYLE = """
-
 """
-
-
-c = Deck()
-c.random(20)
-c.cards[0].sword_origin = S1
-c.cards[0].sword_destiny = S2
-print to_html(c)
