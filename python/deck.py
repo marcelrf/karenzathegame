@@ -84,3 +84,19 @@ class Deck(object):
                     total += abs(card_1.distance_to(card_2) - mean)
         deck_size = len(self.cards)
         return float(total) / (deck_size * (deck_size - 1))
+
+    def feet_balance(self):
+        feet_count = [[0, 0] for i in range(5)]
+        for card in self.cards:
+            feet_count[card.left_foot][0] += 1
+            feet_count[card.right_foot][1] += 1
+        feet_sum = sum(map(lambda x: pow(x[0] - x[1], 2), feet_count))
+        return feet_sum / (2.0 * pow(len(self.cards), 2))
+
+    def sword_balance(self):
+        sword_count = [[0, 0] for i in range(5)]
+        for card in self.cards:
+            sword_count[card.sword_origin][0] += 1
+            sword_count[card.sword_destiny][0] += 1
+        sword_sum = sum(map(lambda x: pow(x[0] - x[1], 2), sword_count))
+        return 1 - sword_sum / (2.0 * pow(len(self.cards), 2))

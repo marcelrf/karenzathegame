@@ -24,7 +24,7 @@ def to_text(element):
         return text
     else: return None
 
-def to_html(element, style=True):
+def to_html(element, fighter, style=True):
     if isinstance(element, Card):
         card = element
         card_types = [None, 'attack', 'defense']
@@ -36,21 +36,21 @@ def to_html(element, style=True):
                     <div class="power">%d</div>
                 </div>
                 <div class="miniature">
-                    <img src="../images/board.png" />
+                    <img src="images/board.png" />
                 </div>
-                <div class="name">Masaru - Card Name</div>
+                <div class="name">%s - Card Name</div>
                 <div class="drawing">
-                    <img src="../images/fighter.png" />
+                    <img src="images/%s.png" />
                 </div>
                 <div class="requisite"></div>
                 <div class="foot %s">
-                    <img src="../images/left_foot.png" />
+                    <img src="images/left_foot.png" />
                 </div>
                 <div class="foot %s">
-                    <img src="../images/right_foot.png" />
+                    <img src="images/right_foot.png" />
                 </div>
                 <div class="sword %s">
-                    <img src="../images/sword.png" />
+                    <img src="images/sword.png" />
                 </div>
                 <div class="min-foot orange %s">&#9679;</div>
                 <div class="min-foot orange %s">&#9679;</div>
@@ -61,6 +61,8 @@ def to_html(element, style=True):
         """ % (
             card_types[card.type],
             card.power,
+            ' '.join(map(lambda x: x.capitalize(), fighter.split('_'))),
+            fighter,
             feet_classes[card.left_foot],
             feet_classes[card.right_foot],
             sword_classes[card.sword_origin],
@@ -79,7 +81,7 @@ def to_html(element, style=True):
         text = '<table cellspacing="0" cellpadding="0">'
         for i in range(len(deck.cards)):
             if i % 3 == 0: text += "<tr>"
-            text += "<td>" + to_html(deck.cards[i], False) + "</td>"
+            text += "<td>" + to_html(deck.cards[i], fighter, False) + "</td>"
             if i % 3 == 2: text += "</tr>"
         text += "</table>"
         if style: text = DECK_STYLE + CARD_STYLE + text
@@ -102,11 +104,11 @@ CARD_STYLE = """
     top: 0.35cm;
 }
 .type.attack {
-    background-image: url('../images/attack.png');
+    background-image: url('images/attack.png');
     color: crimson;
 }
 .type.defense {
-    background-image: url('../images/defense.png');
+    background-image: url('images/defense.png');
     color: green;
 }
 .type .power {
@@ -156,7 +158,7 @@ CARD_STYLE = """
 .requisite {
     height: 4.2cm;
     width: 4.2cm;
-    background-image: url('../images/board.png');
+    background-image: url('images/board.png');
     position: absolute;
     left: 1.5cm;
     top: 4.4cm;
@@ -228,7 +230,7 @@ CARD_STYLE = """
 }
 .trajectory.s1-s2,
 .trajectory.s2-s1 {
-    background-image: url('../images/short.png');
+    background-image: url('images/short.png');
     -moz-transform: rotate(72deg);  /* FF3.5+ */
     -o-transform: rotate(72deg);  /* Opera 10.5 */
     -webkit-transform: rotate(72deg);  /* Saf3.1+, Chrome */
@@ -237,13 +239,13 @@ CARD_STYLE = """
 }
 .trajectory.s1-s3,
 .trajectory.s3-s1 {
-    background-image: url('../images/short.png');
+    background-image: url('images/short.png');
     left: 1.6cm;
     top: 4.74cm;
 }
 .trajectory.s1-s4,
 .trajectory.s4-s1 {
-    background-image: url('../images/long.png');
+    background-image: url('images/long.png');
     -moz-transform: rotate(71deg);  /* FF3.5+ */
     -o-transform: rotate(71deg);  /* Opera 10.5 */
     -webkit-transform: rotate(71deg);  /* Saf3.1+, Chrome */
@@ -252,7 +254,7 @@ CARD_STYLE = """
 }
 .trajectory.s1-s5,
 .trajectory.s5-s1 {
-    background-image: url('../images/long.png');
+    background-image: url('images/long.png');
     -moz-transform: rotate(-72deg);  /* FF3.5+ */
     -o-transform: rotate(-72deg);  /* Opera 10.5 */
     -webkit-transform: rotate(-72deg);  /* Saf3.1+, Chrome */
@@ -261,13 +263,13 @@ CARD_STYLE = """
 }
 .trajectory.s2-s3,
 .trajectory.s3-s2 {
-    background-image: url('../images/long.png');
+    background-image: url('images/long.png');
     left: 1.6cm;
     top: 4.74cm;
 }
 .trajectory.s2-s4,
 .trajectory.s4-s2 {
-    background-image: url('../images/short.png');
+    background-image: url('images/short.png');
     -moz-transform: rotate(143deg);  /* FF3.5+ */
     -o-transform: rotate(143deg);  /* Opera 10.5 */
     -webkit-transform: rotate(143deg);  /* Saf3.1+, Chrome */
@@ -276,7 +278,7 @@ CARD_STYLE = """
 }
 .trajectory.s2-s5,
 .trajectory.s5-s2 {
-    background-image: url('../images/long.png');
+    background-image: url('images/long.png');
     -moz-transform: rotate(144deg);  /* FF3.5+ */
     -o-transform: rotate(144deg);  /* Opera 10.5 */
     -webkit-transform: rotate(144deg);  /* Saf3.1+, Chrome */
@@ -285,7 +287,7 @@ CARD_STYLE = """
 }
 .trajectory.s3-s4,
 .trajectory.s4-s3 {
-    background-image: url('../images/long.png');
+    background-image: url('images/long.png');
     -moz-transform: rotate(-144deg);  /* FF3.5+ */
     -o-transform: rotate(-144deg);  /* Opera 10.5 */
     -webkit-transform: rotate(-144deg);  /* Saf3.1+, Chrome */
@@ -294,7 +296,7 @@ CARD_STYLE = """
 }
 .trajectory.s3-s5,
 .trajectory.s5-s3 {
-    background-image: url('../images/short.png');
+    background-image: url('images/short.png');
     -moz-transform: rotate(-73deg);  /* FF3.5+ */
     -o-transform: rotate(-73deg);  /* Opera 10.5 */
     -webkit-transform: rotate(-73deg);  /* Saf3.1+, Chrome */
@@ -303,7 +305,7 @@ CARD_STYLE = """
 }
 .trajectory.s4-s5,
 .trajectory.s5-s4 {
-    background-image: url('../images/short.png');
+    background-image: url('images/short.png');
     -moz-transform: rotate(-144deg);  /* FF3.5+ */
     -o-transform: rotate(-144deg);  /* Opera 10.5 */
     -webkit-transform: rotate(-144deg);  /* Saf3.1+, Chrome */
@@ -312,7 +314,7 @@ CARD_STYLE = """
 }
 .min-trajectory.s1-s2,
 .min-trajectory.s2-s1 {
-    background-image: url('../images/min-short.png');
+    background-image: url('images/min-short.png');
     -moz-transform: rotate(69deg);  /* FF3.5+ */
     -o-transform: rotate(69deg);  /* Opera 10.5 */
     -webkit-transform: rotate(69deg);  /* Saf3.1+, Chrome */
@@ -321,78 +323,78 @@ CARD_STYLE = """
 }
 .min-trajectory.s1-s3,
 .min-trajectory.s3-s1 {
-    background-image: url('../images/min-short.png');
+    background-image: url('images/min-short.png');
     left: 0.28cm;
     top: 1.53cm;
 }
 .min-trajectory.s1-s4,
 .min-trajectory.s4-s1 {
-    background-image: url('../images/min-long.png');
+    background-image: url('images/min-long.png');
     -moz-transform: rotate(71deg);  /* FF3.5+ */
     -o-transform: rotate(71deg);  /* Opera 10.5 */
     -webkit-transform: rotate(71deg);  /* Saf3.1+, Chrome */
-    left: 0.6cm;
-    top: 4.74cm;
+    left: 0.18cm;
+    top: 1.49cm;
 }
 .min-trajectory.s1-s5,
 .min-trajectory.s5-s1 {
-    background-image: url('../images/min-long.png');
+    background-image: url('images/min-long.png');
     -moz-transform: rotate(-72deg);  /* FF3.5+ */
     -o-transform: rotate(-72deg);  /* Opera 10.5 */
     -webkit-transform: rotate(-72deg);  /* Saf3.1+, Chrome */
-    left: 1.9cm;
-    top: 3.8cm;
+    left: 0.35cm;
+    top: 1.4cm;
 }
 .min-trajectory.s2-s3,
 .min-trajectory.s3-s2 {
-    background-image: url('../images/min-long.png');
-    left: 1.6cm;
-    top: 4.74cm;
+    background-image: url('images/min-long.png');
+    left: 0.32cm;
+    top: 1.5cm;
 }
 .min-trajectory.s2-s4,
 .min-trajectory.s4-s2 {
-    background-image: url('../images/min-short.png');
+    background-image: url('images/min-short.png');
     -moz-transform: rotate(143deg);  /* FF3.5+ */
     -o-transform: rotate(143deg);  /* Opera 10.5 */
     -webkit-transform: rotate(143deg);  /* Saf3.1+, Chrome */
-    left: 0.35cm;
-    top: 3.8cm;
+    left: 0.15cm;
+    top: 1.37cm;
 }
 .min-trajectory.s2-s5,
 .min-trajectory.s5-s2 {
-    background-image: url('../images/min-long.png');
+    background-image: url('images/min-long.png');
     -moz-transform: rotate(144deg);  /* FF3.5+ */
     -o-transform: rotate(144deg);  /* Opera 10.5 */
     -webkit-transform: rotate(144deg);  /* Saf3.1+, Chrome */
-    left: 0.35cm;
-    top: 3.75cm;
+    left: 0.15cm;
+    top: 1.37cm;
 }
 .min-trajectory.s3-s4,
 .min-trajectory.s4-s3 {
-    background-image: url('../images/min-long.png');
+    background-image: url('images/min-long.png');
     -moz-transform: rotate(-144deg);  /* FF3.5+ */
     -o-transform: rotate(-144deg);  /* Opera 10.5 */
     -webkit-transform: rotate(-144deg);  /* Saf3.1+, Chrome */
-    left: 1.15cm;
-    top: 3.23cm;
+    left: 0.258cm;
+    top: 1.31cm;
 }
 .min-trajectory.s3-s5,
 .min-trajectory.s5-s3 {
-    background-image: url('../images/min-short.png');
+    background-image: url('images/min-short.png');
     -moz-transform: rotate(-73deg);  /* FF3.5+ */
     -o-transform: rotate(-73deg);  /* Opera 10.5 */
     -webkit-transform: rotate(-73deg);  /* Saf3.1+, Chrome */
-    left: 1.9cm;
-    top: 3.78cm;
+    left: 0.33cm;
+    top: 1.39cm;
 }
 .min-trajectory.s4-s5,
 .min-trajectory.s5-s4 {
-    background-image: url('../images/min-short.png');
+    background-image: url('images/min-short.png');
     -moz-transform: rotate(-144deg);  /* FF3.5+ */
     -o-transform: rotate(-144deg);  /* Opera 10.5 */
     -webkit-transform: rotate(-144deg);  /* Saf3.1+, Chrome */
-    left: 1.1cm;
-    top: 3.2cm;
+    left: 0.28cm;
+    top: 1.31cm;
 }
 </style>
 """

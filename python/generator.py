@@ -8,7 +8,7 @@ from deck import *
 
 ITERATIONS = 10
 EXCLUDED_PER_ITERATION = 50
-DECK_SAMPLES = 1000
+DECK_SAMPLES = 10000
 CHOSEN_SAMPLES = 500
 
 def generate(deck_size, card_heuristic, deck_heuristic):
