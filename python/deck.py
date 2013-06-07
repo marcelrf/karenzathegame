@@ -103,20 +103,20 @@ class Deck(object):
         return 1 - sword_sum / (2.0 * pow(len(self.cards), 2))
 
     def combo_analysis(self):
+        import sys
         combos = []
         for i in range(100):
-            hand = random.sample(self.cards, 6)
+            hand = random.sample(self.cards, 5)
             combos.extend(self._get_combos(hand))
         if len(combos) > 0:
-            print "combos per hand:", len(combos) / float(100)
-            print "mean combo length:", sum(map(lambda x: len(x), combos)) / float(len(combos))
-            print "mean combo card power:", sum(map(lambda x: sum(map(lambda y: y.power, x)), combos)) / float(sum(map(lambda x: len(x), combos)))
+            sys.stderr.write("combos per hand: %f\n" % (len(combos) / float(100)))
+            sys.stderr.write("mean combo length: %f\n" % (sum(map(lambda x: len(x), combos)) / float(len(combos))))
+            sys.stderr.write("mean combo card power: %f\n" % (sum(map(lambda x: sum(map(lambda y: y.power, x)), combos)) / float(sum(map(lambda x: len(x), combos)))))
             combo_distance = 0
             for combo in combos:
                 for i in range(len(combo) - 1):
                     combo_distance += combo[i].distance_to(combo[i + 1])
-            print "mean combo card distance:", combo_distance / float(sum(map(lambda x: len(x) - 1, combos)))
-
+            sys.stderr.write("mean combo card distance: %f\n" % (combo_distance / float(sum(map(lambda x: len(x) - 1, combos)))))
         else:
             print "no combos found"
 

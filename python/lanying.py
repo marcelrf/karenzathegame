@@ -19,8 +19,8 @@ def card_heuristic(card):
 	# feet level
 	feet_level = card.feet_level()
 	if card.type == ATTACK:
-		feet_level = 4 - feet_level
-	feet_level /= 4.0
+		feet_level = 2 - feet_level
+	feet_level /= 2.0
 	
 	# trajectory length
 	trajectory_length = card.trajectory_length()

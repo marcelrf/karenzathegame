@@ -20,8 +20,8 @@ def card_heuristic(card):
 	# feet level
 	feet_level = card.feet_level()
 	if card.type == ATTACK:
-		feet_level = 4 - feet_level
-	feet_level /= 4.0
+		feet_level = 2 - feet_level
+	feet_level /= 2.0
 	
 	# trajectory length
 	trajectory_length = card.trajectory_length()
@@ -32,9 +32,9 @@ def card_heuristic(card):
 	# total value
 	value = ((
 		5 * feet_level +
-		2 * trajectory_length + 
-		3 * alignment
-	) / 10.0)
+		1 * trajectory_length + 
+		2 * alignment
+	) / 8.0)
 	
 	# normalize total value
 	return int(value * 8) + 1
@@ -53,30 +53,25 @@ def deck_heuristic(deck):
 	for card in deck.cards:
 		if card.feet_orientation() == REVERSE:
 			reverse_count += 1
-	orientation = 1 - reverse_count / 20.0
+	orientation = 1 - reverse_count / float(len(deck.cards))
 
 	# balance
 	feet_balance = deck.feet_balance()
 	sword_balance = deck.sword_balance()
-	balance = (feet_balance + sword_balance) / 2.0
+	balance = feet_balance * sword_balance
 
 	# total value
-	# return ((
-	# 	4 * power +
-	# 	2 * cohesion +
-	# 	4 * balance +
-	# 	1 * orientation
-	# ) / 11.0)
 	return (
-		pow(power, 7) *
-		pow(balance, 3) *
+		pow(power, 6) *
+		pow(balance, 4) *
 		pow(cohesion, 2) *
 		pow(orientation, 1)
 	)
 
 deck = generate(20, card_heuristic, deck_heuristic)
-deck.combo_analysis()
+print deck
 
+# deck.combo_analysis()
 # print to_html(deck, 'masaru')
 # sys.stderr.write("power: %f\n" % deck.mean_power())
 # sys.stderr.write("distance: %f\n" % deck.mean_distance())

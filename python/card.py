@@ -8,48 +8,46 @@ import random
 #      A
 #   1     2
 # B         C
-#  3       4
-#   D  5  E
-FA, FB, FC, FD, FE = range(5)
-S1, S2, S3, S4, S5 = range(5)
+#   3     4
+#      D
+FA, FB, FC, FD = range(4)
+S1, S2, S3, S4 = range(4)
 
 # other enumerations
 NO_TYPE, ATTACK, DEFENSE = range(3)
 NO_FOOT, LEFT_FOOT, RIGHT_FOOT = range(3)
 NO_SWORD, SWORD_ORIGIN, SWORD_DESTINY = range(3)
-FRONT, FRONT_MID, MID, MID_BACK, BACK = range(5)
-STRAIGHT, REVERSE = range(2)
+FRONT, MID, BACK = range(3)
+STRAIGHT, LATERAL, REVERSE = range(3)
 SHORT, LONG = range(2)
 ASCENDANT, HORIZONTAL, DESCENDANT = range(3)
 ALIGNED, SEMI_ALIGNED, NOT_ALIGNED = range(3)
 
 # feet angles respect horizontal (in degrees)
 FEET_ANGLES = {
-    FA: {FB: 36, FC: 144, FD: 72, FE: 108},
-    FB: {FA: 36, FC: 0, FD: 108, FE: 144},
-    FC: {FA: 144, FB: 0, FD: 36, FE: 72},
-    FD: {FA: 72, FB: 108, FC: 36, FE: 0},
-    FE: {FA: 108, FB: 144, FC: 72, FD: 0},
+    FA: {FB: 45, FC: 135, FD: 90},
+    FB: {FA: 45, FC: 0, FD: 135},
+    FC: {FA: 135, FB: 0, FD: 45},
+    FD: {FA: 90, FB: 135, FC: 45},
 }
 # trajectory angles respect horizontal (in degrees)
 TRAJECTORY_ANGLES = {
-    S1: {S2: 0, S3: 72, S4: 144, S5: 108},
-    S2: {S1: 0, S3: 36, S4: 108, S5: 72},
-    S3: {S1: 72, S2: 36, S4: 0, S5: 144},
-    S4: {S1: 144, S2: 108, S3: 0, S5: 36},
-    S5: {S1: 108, S2: 72, S3: 144, S4: 36},
+    S1: {S2: 0, S3: 90, S4: 135},
+    S2: {S1: 0, S3: 45, S4: 90},
+    S3: {S1: 90, S2: 45, S4: 0},
+    S4: {S1: 135, S2: 90, S3: 0},
 }
 
-FEET_POSITIONS = [FA, FB, FC, FD, FE]
-SWORD_POSITIONS = [S1, S2, S3, S4, S5]
+FEET_POSITIONS = [FA, FB, FC, FD]
+SWORD_POSITIONS = [S1, S2, S3, S4]
 
 class Card(object):
 
     def __init__(self):
         self.type = NO_TYPE
         self.power = 0
-        self.feet = [NO_FOOT for i in range(5)]
-        self.sword = [NO_SWORD for i in range(5)]
+        self.feet = [NO_FOOT for i in range(4)]
+        self.sword = [NO_SWORD for i in range(4)]
 
     def __copy__(self):
         other = Card()
@@ -88,8 +86,8 @@ class Card(object):
         text += "|      %s      |\n"
         text += "|   %s     %s   |\n"
         text += "| %s         %s |\n"
-        text += "|  %s       %s  |\n"
-        text += "|   %s  %s  %s   |\n"
+        text += "|   %s     %s   |\n"
+        text += "|      %s      |\n"
         text += "'-------------'"
         instantiation = (
             type_codes[self.type],
@@ -102,8 +100,6 @@ class Card(object):
             sword_codes[self.sword[S3]],
             sword_codes[self.sword[S4]],
             foot_codes[self.feet[FD]],
-            sword_codes[self.sword[S5]],
-            foot_codes[self.feet[FE]],
         )
         return (text % instantiation)
 
@@ -118,7 +114,7 @@ class Card(object):
         self.feet[value] = LEFT_FOOT
     @left_foot.deleter
     def left_foot(self):
-        for i in range(5):
+        for i in range(4):
             if self.feet[i] == LEFT_FOOT:
                 self.feet[i] = NO_FOOT
 
@@ -133,7 +129,7 @@ class Card(object):
         self.feet[value] = RIGHT_FOOT
     @right_foot.deleter
     def right_foot(self):
-        for i in range(5):
+        for i in range(4):
             if self.feet[i] == RIGHT_FOOT:
                 self.feet[i] = NO_FOOT
 
@@ -148,7 +144,7 @@ class Card(object):
         self.sword[value] = SWORD_ORIGIN
     @sword_origin.deleter
     def sword_origin(self):
-        for i in range(5):
+        for i in range(4):
             if self.sword[i] == SWORD_ORIGIN:
                 self.sword[i] = NO_SWORD
 
@@ -163,18 +159,18 @@ class Card(object):
         self.sword[value] = SWORD_DESTINY
     @sword_destiny.deleter
     def sword_destiny(self):
-        for i in range(5):
+        for i in range(4):
             if self.sword[i] == SWORD_DESTINY:
                 self.sword[i] = NO_SWORD
 
     def random(self):
         self.type = random.randint(1, 2)
         self.power = random.randint(1, 9)
-        feet_choices = range(5)
+        feet_choices = range(4)
         self.left_foot = random.choice(feet_choices)
         feet_choices.pop(self.left_foot)
         self.right_foot = random.choice(feet_choices)
-        sword_choices = range(5)
+        sword_choices = range(4)
         self.sword_origin = random.choice(sword_choices)
         sword_choices.pop(self.sword_origin)
         self.sword_destiny = random.choice(sword_choices)
@@ -191,53 +187,27 @@ class Card(object):
 
     def feet_level(self):
         # assumes the card is legal
-        if self.feet[FA] != NO_FOOT:
-            if self.feet[FB] + self.feet[FC] != NO_FOOT:
-                return FRONT
-            else: return MID
-        elif self.feet[FB] + self.feet[FC] != NO_FOOT:
-            if self.feet[FD] + self.feet[FE] != NO_FOOT:
-                return MID_BACK
-            else: return FRONT_MID
-        else: return BACK
+        if NO_FOOT not in [self.feet[FA], self.feet[FD]]: return MID
+        elif self.feet[FA] != NO_FOOT: return FRONT
+        elif self.feet[FD] != NO_FOOT: return BACK
+        else: return MID
 
     def feet_orientation(self):
         # assumes the card is legal
-        if LEFT_FOOT == self.feet[FA]:
-            if RIGHT_FOOT in [self.feet[FC], self.feet[FE]]:
-                return STRAIGHT
-            else: return REVERSE
-        elif LEFT_FOOT == self.feet[FD]:
-            if RIGHT_FOOT != self.feet[FB]: return STRAIGHT
-            else: return REVERSE
-        elif LEFT_FOOT == self.feet[FE]:
-            if RIGHT_FOOT == self.feet[FC]: return STRAIGHT
-            else: return REVERSE
-        elif LEFT_FOOT == self.feet[FC]: return REVERSE
-        else: return STRAIGHT
+        if LEFT_FOOT == self.feet[FB] or RIGHT_FOOT == self.feet[FC]:
+            return STRAIGHT
+        elif LEFT_FOOT == self.feet[FC] or RIGHT_FOOT == self.feet[FB]:
+            return REVERSE
+        else: return LATERAL
 
     def trajectory_length(self):
         # assumes the card is legal
-        if SWORD_ORIGIN == self.sword[S1]:
-            if SWORD_DESTINY in [self.sword[S2], self.sword[S3]]:
-                return SHORT
-            else: return LONG
-        elif SWORD_ORIGIN == self.sword[S2]:
-            if SWORD_DESTINY in [self.sword[S1], self.sword[S4]]:
-                return SHORT
-            else: return LONG
-        elif SWORD_ORIGIN == self.sword[S3]:
-            if SWORD_DESTINY in [self.sword[S1], self.sword[S5]]:
-                return SHORT
-            else: return LONG
-        elif SWORD_ORIGIN == self.sword[S4]:
-            if SWORD_DESTINY in [self.sword[S2], self.sword[S5]]:
-                return SHORT
-            else: return LONG
-        else:
-            if SWORD_DESTINY in [self.sword[S3], self.sword[S4]]:
-                return SHORT
-            else: return LONG
+        if (SWORD_ORIGIN == self.sword[S1] and SWORD_DESTINY == self.sword[S4] or
+            SWORD_ORIGIN == self.sword[S4] and SWORD_DESTINY == self.sword[S1] or
+            SWORD_ORIGIN == self.sword[S2] and SWORD_DESTINY == self.sword[S3] or
+            SWORD_ORIGIN == self.sword[S3] and SWORD_DESTINY == self.sword[S2]):
+            return LONG
+        else: return SHORT
 
     def trajectory_direction(self):
         # assumes the card is legal
@@ -246,11 +216,9 @@ class Card(object):
                 return HORIZONTAL
             else: return DESCENDANT
         elif SWORD_ORIGIN in [self.sword[S3], self.sword[S4]]:
-            if SWORD_DESTINY == self.sword[S5]: return DESCENDANT
-            elif SWORD_DESTINY in [self.sword[S1], self.sword[S2]]:
+            if SWORD_DESTINY in [self.sword[S1], self.sword[S2]]:
                 return ASCENDANT
             else: return HORIZONTAL
-        else: return ASCENDANT
 
     def feet_angle(self):
         # assumes the card is legal
@@ -263,7 +231,7 @@ class Card(object):
     def alignment(self):
         alignment = abs(self.feet_angle() - self.trajectory_angle())
         if alignment == 0: return ALIGNED
-        elif alignment in [36, 144]: return SEMI_ALIGNED
+        elif alignment in [45, 135]: return SEMI_ALIGNED
         else: return NOT_ALIGNED
 
     def distance_to(self, other):
