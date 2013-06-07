@@ -75,6 +75,8 @@ def deck_heuristic(deck):
 	)
 
 deck = generate(20, card_heuristic, deck_heuristic)
-print to_html(deck, 'masaru')
-sys.stderr.write("power: %f\n" % deck.mean_power())
-sys.stderr.write("distance: %f\n" % deck.mean_distance())
+deck.combo_analysis()
+
+# print to_html(deck, 'masaru')
+# sys.stderr.write("power: %f\n" % deck.mean_power())
+# sys.stderr.write("distance: %f\n" % deck.mean_distance())
