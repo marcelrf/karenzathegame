@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import random
+import json
 
 # card indexes
 # letters for feet positions
@@ -43,11 +44,18 @@ SWORD_POSITIONS = [S1, S2, S3, S4]
 
 class Card(object):
 
-    def __init__(self):
-        self.type = NO_TYPE
-        self.power = 0
-        self.feet = [NO_FOOT for i in range(4)]
-        self.sword = [NO_SWORD for i in range(4)]
+    def __init__(self, json_text=None):
+        if json_text is None:
+            self.type = NO_TYPE
+            self.power = 0
+            self.feet = [NO_FOOT for i in range(4)]
+            self.sword = [NO_SWORD for i in range(4)]
+        else:
+            json_object = json.loads(json_text)
+            self.type = json_object['type']
+            self.power = json_object['power']
+            self.feet = json_object['feet']
+            self.sword = json_object['sword']
 
     def __copy__(self):
         other = Card()
@@ -102,6 +110,14 @@ class Card(object):
             foot_codes[self.feet[FD]],
         )
         return (text % instantiation)
+
+    def to_json(self):
+        return json.dumps({
+            "type": self.type,
+            "power": self.power,
+            "feet": self.feet,
+            "sword": self.sword,
+        })
 
     @property
     def left_foot(self):

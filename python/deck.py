@@ -6,8 +6,12 @@ import random
 
 class Deck(object):
 
-    def __init__(self):
-        self.cards = []
+    def __init__(self, json_text=None):
+        if json_text is None:
+            self.cards = []
+        else:
+            card_jsons = json_text[2:-2].split('}, {')
+            self.cards = map(lambda x: Card('{' + x + '}'), card_jsons)
 
     def __copy__(self):
         other = Deck()
@@ -31,6 +35,10 @@ class Deck(object):
             text += str(card) + "\n"
         text += "==============="
         return text
+
+    def to_json(self):
+        card_jsons = map(lambda x: x.to_json(), self.cards)
+        return "[%s]" % ', '.join(card_jsons)
 
     def add(self, card):
         if card not in self.cards:
@@ -101,35 +109,3 @@ class Deck(object):
             sword_count[card.sword_destiny][0] += 1
         sword_sum = sum(map(lambda x: pow(x[0] - x[1], 2), sword_count))
         return 1 - sword_sum / (2.0 * pow(len(self.cards), 2))
-
-    def combo_analysis(self):
-        import sys
-        combos = []
-        for i in range(100):
-            hand = random.sample(self.cards, 5)
-            combos.extend(self._get_combos(hand))
-        if len(combos) > 0:
-            sys.stderr.write("combos per hand: %f\n" % (len(combos) / float(100)))
-            sys.stderr.write("mean combo length: %f\n" % (sum(map(lambda x: len(x), combos)) / float(len(combos))))
-            sys.stderr.write("mean combo card power: %f\n" % (sum(map(lambda x: sum(map(lambda y: y.power, x)), combos)) / float(sum(map(lambda x: len(x), combos)))))
-            combo_distance = 0
-            for combo in combos:
-                for i in range(len(combo) - 1):
-                    combo_distance += combo[i].distance_to(combo[i + 1])
-            sys.stderr.write("mean combo card distance: %f\n" % (combo_distance / float(sum(map(lambda x: len(x) - 1, combos)))))
-        else:
-            print "no combos found"
-
-    def _get_combos(self, hand):
-        if len(hand) == 1:
-            return [hand]
-        combos = []
-        for card in hand:
-            rest = list(hand)
-            rest.remove(card)
-            rest_combos = self._get_combos(rest)
-            for combo in rest_combos:
-                if card.distance_to(combo[0]) <= 2:
-                    combos.append([card] + combo)
-            combos.append([card])
-        return combos

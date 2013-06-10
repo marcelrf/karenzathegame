@@ -68,6 +68,39 @@ def deck_heuristic(deck):
 		pow(orientation, 1)
 	)
 
+# def combo_analysis(self):
+#     import sys
+#     combos = []
+#     for i in range(100):
+#         hand = random.sample(self.cards, 5)
+#         combos.extend(self._get_combos(hand))
+#     if len(combos) > 0:
+#         sys.stderr.write("combos per hand: %f\n" % (len(combos) / float(100)))
+#         sys.stderr.write("mean combo length: %f\n" % (sum(map(lambda x: len(x), combos)) / float(len(combos))))
+#         sys.stderr.write("mean combo card power: %f\n" % (sum(map(lambda x: sum(map(lambda y: y.power, x)), combos)) / float(sum(map(lambda x: len(x), combos)))))
+#         combo_distance = 0
+#         for combo in combos:
+#             for i in range(len(combo) - 1):
+#                 combo_distance += combo[i].distance_to(combo[i + 1])
+#         sys.stderr.write("mean combo card distance: %f\n" % (combo_distance / float(sum(map(lambda x: len(x) - 1, combos)))))
+#     else:
+#         print "no combos found"
+
+# def _get_combos(self, hand):
+#     if len(hand) == 1:
+#         return [hand]
+#     combos = []
+#     for card in hand:
+#         rest = list(hand)
+#         rest.remove(card)
+#         rest_combos = self._get_combos(rest)
+#         for combo in rest_combos:
+#             if card.distance_to(combo[0]) <= 2:
+#                 combos.append([card] + combo)
+#         combos.append([card])
+#     return combos
+
+
 deck = generate(20, card_heuristic, deck_heuristic)
 print deck
 
