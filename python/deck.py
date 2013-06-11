@@ -48,6 +48,11 @@ class Deck(object):
         if card in self.cards:
             self.cards.remove(card)
 
+    def draw(self):
+        chosen_card = random.choice(self.cards)
+        self.cards.remove(chosen_card)
+        return chosen_card
+
     def random(self, size):
         self.name = ''
         self.cards = []

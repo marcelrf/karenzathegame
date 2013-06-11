@@ -60,12 +60,6 @@ def deck_heuristic(deck):
 	balance = (feet_balance + sword_balance) / 2.0
 
 	# total value
-	# return ((
-	# 	4 * power +
-	# 	2 * cohesion +
-	# 	4 * balance +
-	# 	1 * orientation
-	# ) / 11.0)
 	return (
 		pow(power, 2) *
 		pow(balance, 7) *
@@ -74,8 +68,4 @@ def deck_heuristic(deck):
 	)
 
 deck = generate(20, card_heuristic, deck_heuristic)
-deck.combo_analysis()
-
-# print to_html(deck, 'lanying')
-# sys.stderr.write("power: %f\n" % deck.mean_power())
-# sys.stderr.write("distance: %f\n" % deck.mean_distance())
+print deck.to_json()

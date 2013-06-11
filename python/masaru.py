@@ -100,11 +100,5 @@ def deck_heuristic(deck):
 #         combos.append([card])
 #     return combos
 
-
 deck = generate(20, card_heuristic, deck_heuristic)
-print deck
-
-# deck.combo_analysis()
-# print to_html(deck, 'masaru')
-# sys.stderr.write("power: %f\n" % deck.mean_power())
-# sys.stderr.write("distance: %f\n" % deck.mean_distance())
+print deck.to_json()

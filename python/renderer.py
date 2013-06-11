@@ -17,10 +17,6 @@ def to_text(element):
                     text += card_texts[i].pop(0)
                 text += '\n'
             cards = cards[5:]
-        text += "Mean power: %f" % deck.mean_power() + "\n"
-        text += "Power deviation: %f" % deck.power_deviation() + "\n"
-        text += "Mean distance: %f" % deck.mean_distance() + "\n"
-        text += "Distance deviation: %f" % deck.distance_deviation()
         return text
     else: return None
 
@@ -84,7 +80,7 @@ def to_html(element, fighter, style=True):
             text += "<td>" + to_html(deck.cards[i], fighter, False) + "</td>"
             if i % 3 == 2: text += "</tr>"
         text += "</table>"
-        if style: text = DECK_STYLE + CARD_STYLE + text
+        if style: text = CARD_STYLE + text
         return text
 
 CARD_STYLE = """
@@ -397,7 +393,4 @@ CARD_STYLE = """
     top: 1.31cm;
 }
 </style>
-"""
-
-DECK_STYLE = """
 """
