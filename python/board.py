@@ -1,5 +1,7 @@
 # coding: utf-8
 
+import random
+
 # board indexes
 # letters for feet positions
 # numbers for sword positions
@@ -43,7 +45,7 @@ class Board(object):
             NO_FOOT: '·',
         }
         sword_codes = {
-            SWORD: 'x',
+            SWORD: 'o',
             NO_SWORD: ' ',
         }
         text  = "   .---------.   \n"
@@ -64,6 +66,14 @@ class Board(object):
             foot_codes[self.foot_squares[FD]],
         )
         return (text % instantiation)
+
+    def random(self):
+        feet_choices = range(4)
+        self.left_foot = random.choice(feet_choices)
+        feet_choices.pop(self.left_foot)
+        self.right_foot = random.choice(feet_choices)
+        sword_choices = range(4)
+        self.sword = random.choice(sword_choices)
 
     @property
     def left_foot(self):

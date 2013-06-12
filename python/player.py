@@ -8,10 +8,10 @@ import random
 
 class Player(object):
 
-    def __init__(self, deck_json):
-        self.deck = deck.Deck(deck_json)
-        self.hand = hand.Hand()
-        self.board = board.Board()
+    def __init__(self):
+        self.deck = None
+        self.hand = None
+        self.board = None
         self.score = 0
 
     def __copy__(self):
@@ -32,6 +32,14 @@ class Player(object):
 
     def __str__(self):
         return str(self.hand) + "\n" + str(self.board)
+
+    def setup(self, deck_json, card_number):
+        self.deck = deck.Deck(deck_json)
+        self.hand = hand.Hand()
+        self.board = board.Board()
+        self.board.random()
+        self.score = 0
+        self.draw_up_to(card_number)
 
     def draw_up_to(self, card_number):
         while self.hand.size() < card_number:
