@@ -2,6 +2,14 @@
 
 from card import *
 from deck import *
+import sys
+
+def main():
+    deck_filename = sys.argv[1]
+    deck_file = open(deck_filename, 'r')
+    deck_json = deck_file.read()[:-1]
+    deck = Deck(deck_json)
+    print to_html(deck, sys.argv[2])
 
 def to_text(element):
     if isinstance(element, Card):
@@ -49,7 +57,7 @@ def to_html(element, fighter, style=True):
                     <img src="images/sword.png" />
                 </div>
                 <div class="min-foot orange %s">&#9679;</div>
-                <div class="min-foot orange %s">&#9679;</div>
+                <div class="min-foot red %s">&#9679;</div>
                 <div class="min-sword blue %s">&#9679;</div>
                 <div class="trajectory %s-%s"></div>
                 <div class="min-trajectory %s-%s"></div>
@@ -61,10 +69,10 @@ def to_html(element, fighter, style=True):
             fighter,
             feet_classes[card.left_foot],
             feet_classes[card.right_foot],
-            sword_classes[card.sword_origin],
+            sword_classes[card.sword_destiny],
             feet_classes[card.left_foot],
             feet_classes[card.right_foot],
-            sword_classes[card.sword_origin],
+            sword_classes[card.sword_destiny],
             sword_classes[card.sword_origin],
             sword_classes[card.sword_destiny],
             sword_classes[card.sword_origin],
@@ -168,11 +176,10 @@ CARD_STYLE = """
     width: 1cm;
     height: 1cm;
 }
-.foot.fa { left: 3.115cm; top: 4.435cm; }
-.foot.fb { left: 1.54cm; top: 5.55cm; }
-.foot.fc { left: 4.7cm; top: 5.55cm; }
-.foot.fd { left: 2.13cm; top: 7.4cm; }
-.foot.fe { left: 4.12cm; top: 7.4cm; }
+.foot.fa { left: 3.07cm; top: 4.49cm; }
+.foot.fb { left: 1.58cm; top: 6.08cm; }
+.foot.fc { left: 4.62cm; top: 6.03cm; }
+.foot.fd { left: 3.11cm; top: 7.57cm; }
 .sword {
     width: 0.9cm;
     height: 0.9cm;
@@ -182,29 +189,32 @@ CARD_STYLE = """
     width: 1cm;
     height: 1cm;
 }
-.sword.s1 { left: 2.19cm; top: 4.82cm; }
-.sword.s2 { left: 4.06cm; top: 4.82cm; }
-.sword.s3 { left: 1.6cm; top: 6.55cm; }
-.sword.s4 { left: 4.65cm; top: 6.55cm; }
+.sword.s1 { left: 2.08cm; top: 4.99cm; }
+.sword.s2 { left: 4.12cm; top: 5cm; }
+.sword.s3 { left: 2.06cm; top: 7.1cm; }
+.sword.s4 { left: 4.17cm; top: 7.1cm; }
 .sword.s5 { left: 3.15cm; top: 7.64cm; }
 .min-foot {
     position: absolute;
 }
-.min-foot.fa { left: 0.6cm; top: 1.25cm; }
-.min-foot.fb { left: 0.23cm; top: 1.53cm; }
-.min-foot.fc { left: 0.993cm; top: 1.53cm; }
-.min-foot.fd { left: 0.38cm; top: 1.97cm; }
+.min-foot.fa { left: 0.6cm; top: 1.26cm; }
+.min-foot.fb { left: 0.25cm; top: 1.65cm; }
+.min-foot.fc { left: 0.99cm; top: 1.63cm; }
+.min-foot.fd { left: 0.6cm; top: 1.99cm; }
 .min-foot.fe { left: 0.85cm; top: 1.97cm; }
 .min-sword {
     position: absolute;
 }
-.min-sword.s1 { left: 0.36cm; top: 1.33cm; }
-.min-sword.s2 { left: 0.85cm; top: 1.33cm; }
-.min-sword.s3 { left: 0.25cm; top: 1.75cm; }
-.min-sword.s4 { left: 0.99cm; top: 1.75cm; }
+.min-sword.s1 { left: 0.36cm; top: 1.39cm; }
+.min-sword.s2 { left: 0.85cm; top: 1.39cm; }
+.min-sword.s3 { left: 0.36cm; top: 1.87cm; }
+.min-sword.s4 { left: 0.85cm; top: 1.87cm; }
 .min-sword.s5 { left: 0.6cm; top: 2cm; }
 .orange {
     color: orange;
+}
+.red {
+    color: orangered;
 }
 .blue {
     color: blue;
@@ -227,26 +237,26 @@ CARD_STYLE = """
 .trajectory.s1-s2,
 .trajectory.s2-s1 {
     background-image: url('images/short.png');
-    -moz-transform: rotate(72deg);  /* FF3.5+ */
-    -o-transform: rotate(72deg);  /* Opera 10.5 */
-    -webkit-transform: rotate(72deg);  /* Saf3.1+, Chrome */
-    left: 0.6cm;
-    top: 4.74cm;
+    -moz-transform: rotate(89deg);  /* FF3.5+ */
+    -o-transform: rotate(89deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(89deg);  /* Saf3.1+, Chrome */
+    left: 0.8cm;
+    top: 4.46cm;
 }
 .trajectory.s1-s3,
 .trajectory.s3-s1 {
     background-image: url('images/short.png');
-    left: 1.6cm;
-    top: 4.74cm;
+    left: 1.5cm;
+    top: 4.4cm;
 }
 .trajectory.s1-s4,
 .trajectory.s4-s1 {
     background-image: url('images/long.png');
-    -moz-transform: rotate(71deg);  /* FF3.5+ */
-    -o-transform: rotate(71deg);  /* Opera 10.5 */
-    -webkit-transform: rotate(71deg);  /* Saf3.1+, Chrome */
-    left: 0.6cm;
-    top: 4.74cm;
+    -moz-transform: rotate(90deg);  /* FF3.5+ */
+    -o-transform: rotate(90deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(90deg);  /* Saf3.1+, Chrome */
+    left: 0.76cm;
+    top: 4.48cm;
 }
 .trajectory.s1-s5,
 .trajectory.s5-s1 {
@@ -260,17 +270,17 @@ CARD_STYLE = """
 .trajectory.s2-s3,
 .trajectory.s3-s2 {
     background-image: url('images/long.png');
-    left: 1.6cm;
-    top: 4.74cm;
+    left: 1.5cm;
+    top: 4.4cm;
 }
 .trajectory.s2-s4,
 .trajectory.s4-s2 {
     background-image: url('images/short.png');
-    -moz-transform: rotate(143deg);  /* FF3.5+ */
-    -o-transform: rotate(143deg);  /* Opera 10.5 */
-    -webkit-transform: rotate(143deg);  /* Saf3.1+, Chrome */
-    left: 0.35cm;
-    top: 3.8cm;
+    -moz-transform: rotate(178deg);  /* FF3.5+ */
+    -o-transform: rotate(178deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(178deg);  /* Saf3.1+, Chrome */
+    left: 0.65cm;
+    top: 3.75cm;
 }
 .trajectory.s2-s5,
 .trajectory.s5-s2 {
@@ -283,12 +293,12 @@ CARD_STYLE = """
 }
 .trajectory.s3-s4,
 .trajectory.s4-s3 {
-    background-image: url('images/long.png');
-    -moz-transform: rotate(-144deg);  /* FF3.5+ */
-    -o-transform: rotate(-144deg);  /* Opera 10.5 */
-    -webkit-transform: rotate(-144deg);  /* Saf3.1+, Chrome */
-    left: 1.15cm;
-    top: 3.23cm;
+    background-image: url('images/short.png');
+    -moz-transform: rotate(-90deg);  /* FF3.5+ */
+    -o-transform: rotate(-90deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(-90deg);  /* Saf3.1+, Chrome */
+    left: 1.4cm;
+    top: 3.6cm;
 }
 .trajectory.s3-s5,
 .trajectory.s5-s3 {
@@ -311,26 +321,26 @@ CARD_STYLE = """
 .min-trajectory.s1-s2,
 .min-trajectory.s2-s1 {
     background-image: url('images/min-short.png');
-    -moz-transform: rotate(69deg);  /* FF3.5+ */
-    -o-transform: rotate(69deg);  /* Opera 10.5 */
-    -webkit-transform: rotate(69deg);  /* Saf3.1+, Chrome */
-    left: 0.19cm;
-    top: 1.49cm;
+    -moz-transform: rotate(90deg);  /* FF3.5+ */
+    -o-transform: rotate(90deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(90deg);  /* Saf3.1+, Chrome */
+    left: 0.21cm;
+    top: 1.44cm;
 }
 .min-trajectory.s1-s3,
 .min-trajectory.s3-s1 {
     background-image: url('images/min-short.png');
-    left: 0.28cm;
-    top: 1.53cm;
+    left: 0.26cm;
+    top: 1.42cm;
 }
 .min-trajectory.s1-s4,
 .min-trajectory.s4-s1 {
     background-image: url('images/min-long.png');
-    -moz-transform: rotate(71deg);  /* FF3.5+ */
-    -o-transform: rotate(71deg);  /* Opera 10.5 */
-    -webkit-transform: rotate(71deg);  /* Saf3.1+, Chrome */
-    left: 0.18cm;
-    top: 1.49cm;
+    -moz-transform: rotate(90deg);  /* FF3.5+ */
+    -o-transform: rotate(90deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(90deg);  /* Saf3.1+, Chrome */
+    left: 0.23cm;
+    top: 1.44cm;
 }
 .min-trajectory.s1-s5,
 .min-trajectory.s5-s1 {
@@ -344,17 +354,17 @@ CARD_STYLE = """
 .min-trajectory.s2-s3,
 .min-trajectory.s3-s2 {
     background-image: url('images/min-long.png');
-    left: 0.32cm;
-    top: 1.5cm;
+    left: 0.26cm;
+    top: 1.42cm;
 }
 .min-trajectory.s2-s4,
 .min-trajectory.s4-s2 {
     background-image: url('images/min-short.png');
-    -moz-transform: rotate(143deg);  /* FF3.5+ */
-    -o-transform: rotate(143deg);  /* Opera 10.5 */
-    -webkit-transform: rotate(143deg);  /* Saf3.1+, Chrome */
-    left: 0.15cm;
-    top: 1.37cm;
+    -moz-transform: rotate(180deg);  /* FF3.5+ */
+    -o-transform: rotate(180deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(180deg);  /* Saf3.1+, Chrome */
+    left: 0.23cm;
+    top: 1.4cm;
 }
 .min-trajectory.s2-s5,
 .min-trajectory.s5-s2 {
@@ -367,12 +377,12 @@ CARD_STYLE = """
 }
 .min-trajectory.s3-s4,
 .min-trajectory.s4-s3 {
-    background-image: url('images/min-long.png');
-    -moz-transform: rotate(-144deg);  /* FF3.5+ */
-    -o-transform: rotate(-144deg);  /* Opera 10.5 */
-    -webkit-transform: rotate(-144deg);  /* Saf3.1+, Chrome */
-    left: 0.258cm;
-    top: 1.31cm;
+    background-image: url('images/min-short.png');
+    -moz-transform: rotate(-90deg);  /* FF3.5+ */
+    -o-transform: rotate(-90deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(-90deg);  /* Saf3.1+, Chrome */
+    left: 0.25cm;
+    top: 1.4cm;
 }
 .min-trajectory.s3-s5,
 .min-trajectory.s5-s3 {
@@ -394,3 +404,6 @@ CARD_STYLE = """
 }
 </style>
 """
+
+if __name__ == '__main__':
+    main()
