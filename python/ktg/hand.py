@@ -19,11 +19,12 @@ class Hand(object):
 
     def __str__(self):
         text = ""
-        card_texts = map(lambda x: str(x).split("\n"), self.cards)
-        while len(card_texts[0]) > 0:
-            for i in range(len(card_texts)):
-                text += card_texts[i].pop(0)
-            text += '\n'
+        if len(self.cards) > 0:
+            card_texts = map(lambda x: str(x).split("\n"), self.cards)
+            while len(card_texts[0]) > 0:
+                for i in range(len(card_texts)):
+                    text += card_texts[i].pop(0)
+                text += '\n'
         return text
 
     def size(self):
@@ -31,3 +32,6 @@ class Hand(object):
 
     def add(self, card):
         self.cards.append(card)
+
+    def remove(self, card):
+        self.cards.remove(card)

@@ -14,7 +14,6 @@ CHOSEN_SAMPLES = 500
 def generate(deck_size, card_heuristic, deck_heuristic):
     cards = get_all_cards(card_heuristic)
     for i in range(ITERATIONS):
-        log_iteration(i, cards)
         decks = get_random_decks(cards, DECK_SAMPLES, deck_size / 2)
         sorted_decks = get_sorted_decks(decks, deck_heuristic)
         sorted_cards = get_sorted_cards(sorted_decks[:CHOSEN_SAMPLES])
@@ -81,9 +80,3 @@ def exclude_worse_cards(cards, quantity):
         ATTACK: cards[ATTACK][:-quantity],
         DEFENSE: cards[DEFENSE][:-quantity],
     }
-
-def log_iteration(i, cards):
-    sys.stderr.write(
-        "iteration %d: %d cards\n" %
-        (i + 1, len(cards[ATTACK]) + len(cards[DEFENSE]))
-    )

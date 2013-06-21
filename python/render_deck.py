@@ -1,7 +1,8 @@
 # coding: utf-8
 
-from card import *
-from deck import *
+import ktg
+from ktg.card import *
+from ktg.deck import *
 import sys
 
 def main():

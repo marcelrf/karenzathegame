@@ -31,7 +31,11 @@ class Player(object):
         )
 
     def __str__(self):
-        return str(self.hand) + "\n" + str(self.board)
+        text  = str(self.hand)
+        text += str(self.board) + "\n"
+        text += 'Cards in deck: ' + str(len(self.deck.cards)) + ', '
+        text += 'Score: ' + str(self.score)
+        return text
 
     def setup(self, deck_json, card_number):
         self.deck = deck.Deck(deck_json)
@@ -43,4 +47,6 @@ class Player(object):
 
     def draw_up_to(self, card_number):
         while self.hand.size() < card_number:
+            if len(self.deck.cards) == 0:
+                raise Exception('No more cards left')
             self.hand.add(self.deck.draw())

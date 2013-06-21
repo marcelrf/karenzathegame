@@ -130,3 +130,4 @@ class Board(object):
         ]
         distance = map(lambda x: 1 if x else 0, conditions)
         return reduce(lambda x, y: x + y, distance)
+
