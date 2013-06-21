@@ -9,44 +9,67 @@ from ktg import player
 from ktg import card
 
 def main():
-    log("setting up game...")
-    filename1, filename2 = sys.argv[1:3]
-    deck_json1, deck_json2 = open(filename1).read()[:-1], open(filename2).read()[:-1]
-    g = game.Game()
-    g.setup(deck_json1, deck_json2)
-    log("starting game...")
-    while not g.has_ended():
-        print g
-        log("turn for player %d" % g.turn)
-        player = g.current_player()
-        if g.player_is_threatened():
-            log("(player is threatened)")
-            defense = choose_card(card.DEFENSE, player.hand, player.board, g.last_moved)
-            if defense:
-                # log("can play a defense!")
-                moves = choose_moves(player.board, defense[0], g.last_moved)
-                if moves:
-                    # log("will move some pieces...")
-                    g.apply_moves(moves)
-                # log("and plays the defense")
-                print 'PLAYER PLAYS THE CARD'
-                print defense[0]
-                g.play_card(defense[0])
+    games = int(sys.argv[3])
+    home, tie, away = 0, 0, 0
+    for i in range(games):
+        log("setting up game...")
+        filename1, filename2 = sys.argv[1:3]
+        deck_json1, deck_json2 = open(filename1).read()[:-1], open(filename2).read()[:-1]
+        g = game.Game()
+        g.setup(deck_json1, deck_json2)
+        log("starting game...")
+        while not g.has_ended():
+            print g
+            log("turn for player %d" % g.turn)
+            player = g.current_player()
+            if g.player_is_threatened():
+                log("(player is threatened)")
+                defense = choose_card(card.DEFENSE, player.hand, player.board, g.last_moved)
+                if defense:
+                    # log("can play a defense!")
+                    moves = choose_moves(player.board, defense[0], g.last_moved)
+                    if moves:
+                        # log("will move some pieces...")
+                        g.apply_moves(moves)
+                    # log("and plays the defense")
+                    print 'PLAYER PLAYS THE CARD'
+                    print defense[0]
+                    g.play_card(defense[0])
+                else:
+                    # log("can NOT play defense!")
+                    defense = choose_card(card.DEFENSE, player.hand, player.board)
+                    if defense:
+                        moves = choose_moves(player.board, defense[0])
+                        # log("at least will move some pieces...")
+                        g.apply_moves(moves)
+                    g.score()
             else:
-                # log("can NOT play defense!")
+                log("(player has the initiative)")
+                attack = choose_card(card.ATTACK, player.hand, player.board)
                 defense = choose_card(card.DEFENSE, player.hand, player.board)
-                if defense:
-                    moves = choose_moves(player.board, defense[0])
-                    # log("at least will move some pieces...")
-                    g.apply_moves(moves)
-                g.score()
-        else:
-            log("(player has the initiative)")
-            attack = choose_card(card.ATTACK, player.hand, player.board)
-            defense = choose_card(card.DEFENSE, player.hand, player.board)
-            if attack:
-                if defense:
-                    if attack[1] > defense[1] and attack[1] > 100:
+                if attack:
+                    if defense:
+                        if attack[1] > defense[1] and attack[1] > 100:
+                            # log("chooses to attack!")
+                            moves = choose_moves(player.board, attack[0])
+                            if moves:
+                                # log("will move some pieces...")
+                                g.apply_moves(moves)
+                            # log("and plays the attack")
+                            print 'PLAYER PLAYS THE CARD'
+                            print attack[0]
+                            g.play_card(attack[0])
+                        else:
+                            # log("chooses NOT to attack!")
+                            moves = choose_moves(player.board, defense[0])
+                            if moves:
+                                # log("at least will move some pieces...")
+                                g.apply_moves(moves)
+                            if g.hand_is_full():
+                                discard(player.hand, player.board, [attack[0], defense[0]])
+                            g.change_turn()
+                            g.draw_event()
+                    else:
                         # log("chooses to attack!")
                         moves = choose_moves(player.board, attack[0])
                         if moves:
@@ -56,50 +79,34 @@ def main():
                         print 'PLAYER PLAYS THE CARD'
                         print attack[0]
                         g.play_card(attack[0])
-                    else:
-                        # log("chooses NOT to attack!")
-                        moves = choose_moves(player.board, defense[0])
-                        if moves:
-                            # log("at least will move some pieces...")
-                            g.apply_moves(moves)
-                        if g.hand_is_full():
-                            discard(player.hand, player.board, [attack[0], defense[0]])
-                        g.change_turn()
-                        g.draw_event()
-                else:
-                    # log("chooses to attack!")
-                    moves = choose_moves(player.board, attack[0])
+                elif defense:
+                    # log("can NOT play attack!")
+                    moves = choose_moves(player.board, defense[0])
                     if moves:
-                        # log("will move some pieces...")
+                        # log("at least will move some pieces...")
                         g.apply_moves(moves)
-                    # log("and plays the attack")
-                    print 'PLAYER PLAYS THE CARD'
-                    print attack[0]
-                    g.play_card(attack[0])
-            elif defense:
-                # log("can NOT play attack!")
-                moves = choose_moves(player.board, defense[0])
-                if moves:
-                    # log("at least will move some pieces...")
-                    g.apply_moves(moves)
-                if g.hand_is_full():
-                    discard(player.hand, player.board, [defense[0]])
-                g.change_turn()
-                g.draw_event()
-            else:
-                # log("WOW player can not play any card!")
-                if len(player.hand.cards) > 0:
-                    moves = choose_moves(player.board, player.hand.cards[0])
-                    # log("at least will move some pieces...")
-                    g.apply_moves(moves)
-                if g.hand_is_full():
-                    discard(player.hand, player.board, [])
-                g.change_turn()
-                g.draw_event()
-        # sys.stdin.readline()
-    print '##################################'
-    print 'GAME ENDED!'
-    print 'SCORE: ' + str(g.player1.score) + '/' + str(g.player2.score)
+                    if g.hand_is_full():
+                        discard(player.hand, player.board, [defense[0]])
+                    g.change_turn()
+                    g.draw_event()
+                else:
+                    # log("WOW player can not play any card!")
+                    if len(player.hand.cards) > 0:
+                        moves = choose_moves(player.board, player.hand.cards[0])
+                        # log("at least will move some pieces...")
+                        g.apply_moves(moves)
+                    if g.hand_is_full():
+                        discard(player.hand, player.board, [])
+                    g.change_turn()
+                    g.draw_event()
+            # sys.stdin.readline()
+        print '##################################'
+        print 'GAME ENDED!'
+        print 'SCORE: ' + str(g.player1.score) + '/' + str(g.player2.score)
+        if g.player1.score > g.player2.score: home += 1
+        elif g.player1.score == g.player2.score: tie += 1
+        else: away += 1
+    print home, tie, away
 
 def choose_card(type, hand, board, max_moves=2):
     weighted_cards = []

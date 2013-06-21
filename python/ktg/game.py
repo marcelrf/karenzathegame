@@ -67,6 +67,8 @@ class Game(object):
     def play_card(self, card):
         player = self.current_player()
         player.hand.remove(card)
+        move = ['sword', card.sword_destiny]
+        self.apply_moves([move])
         if self.player_is_threatened():
             if card.power < self.last_played.power:
                 self.change_turn()
