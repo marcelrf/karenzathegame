@@ -43,6 +43,7 @@ def main():
                         # log("at least will move some pieces...")
                         g.apply_moves(moves)
                     g.score()
+                    g.change_turn()
             else:
                 log("(player has the initiative)")
                 attack = choose_card(card.ATTACK, player.hand, player.board)

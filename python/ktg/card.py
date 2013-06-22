@@ -23,6 +23,7 @@ STRAIGHT, LATERAL, REVERSE = range(3)
 SHORT, LONG = range(2)
 ASCENDANT, HORIZONTAL, DESCENDANT = range(3)
 ALIGNED, SEMI_ALIGNED, NOT_ALIGNED = range(3)
+LEFT_GUARD, FRONT_GUARD, RIGHT_GUARD = range(3)
 
 # feet angles respect horizontal (in degrees)
 FEET_ANGLES = {
@@ -249,6 +250,13 @@ class Card(object):
         if alignment == 0: return ALIGNED
         elif alignment in [45, 135]: return SEMI_ALIGNED
         else: return NOT_ALIGNED
+
+    def guard_side(self):
+        if self.left_foot == FA or self.right_foot == FD:
+            return LEFT_GUARD
+        elif self.right_foot == FA or self.left_foot == FD:
+            return RIGHT_GUARD
+        else: return FRONT_GUARD
 
     def distance_to(self, other):
         # assumes the card is legal
