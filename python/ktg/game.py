@@ -50,17 +50,17 @@ class Game(object):
         return len(player.hand.cards) == CARDS_IN_HAND
 
     def draw_event(self):
-        print 'BOTH PLAYERS DRAW UP TO ' + str(CARDS_IN_HAND) + ' CARDS'
         try:
             self.player1.draw_up_to(CARDS_IN_HAND)
             self.player2.draw_up_to(CARDS_IN_HAND)
         except:
             self.time_up = True
 
-    def apply_moves(self, moves):
+    def apply_moves(self, moves, logs=False):
         player = self.current_player()
         for move in moves:
-            print "PLAYER MOVES %s TO POSITION %d" % (move[0], move[1])
+            if logs:
+                print "PLAYER MOVES %s TO POSITION %d" % (move[0], move[1])
             setattr(player.board, move[0], move[1])
         self.last_moved = len(moves)
 
@@ -77,7 +77,6 @@ class Game(object):
 
     def score(self):
         scorer = 1 if self.turn == 2 else 2
-        print 'AND PLAYER ' + str(scorer) + ' SCORES ' + str(self.last_played.power) + ' POINTS'
         if scorer == 1: self.player1.score += self.last_played.power
         elif scorer == 2: self.player2.score += self.last_played.power
         self.last_played = None
