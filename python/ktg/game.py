@@ -3,7 +3,7 @@
 import player
 import card
 
-CARDS_IN_HAND = 5
+CARDS_IN_HAND = 7
 
 class Game(object):
 
@@ -70,7 +70,7 @@ class Game(object):
         move = ['sword', card.sword_destiny]
         self.apply_moves([move])
         if self.player_is_threatened():
-            if card.power < self.last_played.power:
+            if card.power <= self.last_played.power:
                 self.change_turn()
         else: self.change_turn()
         self.last_played = card
