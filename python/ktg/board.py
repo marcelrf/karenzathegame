@@ -45,7 +45,7 @@ class Board(object):
             NO_FOOT: '·',
         }
         sword_codes = {
-            SWORD: 'o',
+            SWORD: 's',
             NO_SWORD: ' ',
         }
         text  = "   .---------.   \n"
