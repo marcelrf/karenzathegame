@@ -23,13 +23,26 @@ def main():
     for control_json in control_decks:
         for i in range(GAMES):
             winner = play_game(deck_json, control_json, 1)
-            if winner == '1': wins += 1
-            elif winner == 'x': ties += 1
-            elif winner == '2': losses += 1
+            if winner == '1':
+                wins += 1
+                print "win"
+            elif winner == 'x':
+                ties += 1
+                print "tie"
+            elif winner == '2':
+                losses += 1
+                print "loss"
             winner = play_game(control_json, deck_json, 2)
-            if winner == '2': wins += 1
-            elif winner == 'x': ties += 1
-            elif winner == '1': losses += 1
+            if winner == '2':
+                wins += 1
+                print "win"
+            elif winner == 'x':
+                ties += 1
+                print "tie"
+            elif winner == '1':
+                losses += 1
+                print "loss"
+        print "%d/%d/%d" % (wins, ties, losses)
     print "%d/%d/%d" % (wins, ties, losses)
     played_cards.sort(key=lambda x: x[1], reverse=True)
     print "most played card:"
