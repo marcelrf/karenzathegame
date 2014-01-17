@@ -4,8 +4,8 @@ import copy
 
 class Hand(object):
 
-    def __init__(self):
-        self.cards = []
+    def __init__(self, cards=[]):
+        self.cards = cards
 
     def __copy__(self):
         other = Hand()
