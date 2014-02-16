@@ -105,10 +105,12 @@ The game ends when a player (the winner) scores 10 or more points. It also immed
 4 Example Game
 --------------
 
-4.1 Introduction
+**4.1 Introduction**
+
 Let’s consider a game between two imaginary players, say Joey and Rachel. We’ll follow it turn by turn so that you can understand how it goes. For simplicity reasons they will play with only 3 cards in hand. When you play in the real world, remember to use 7 cards!
 
-4.2 Setup
+**4.2 Setup**
+
 Joey and Rachel shuffle their respective decks and hand them face-down to the other. Now Joey cuts Rachel’s deck and Rachel does the same with Joey’s deck and both hand the decks back to their owners. After that, Joey and Rachel decide who will start the game by flipping a coin (Joey wins, so he will start). Now both players draw 3 cards. Here’s Joey’s hand, he plays with Masaru, the great samurai:
 [DRAWING]
 And here’s Rachel’s hand, she plays with Lanying, the beautiful chinese swordswoman:
@@ -120,44 +122,45 @@ Then, it’s Rachel’s turn to place the tokens in her board, she places them l
 Note that Joey and Rachel analyzed their cards to decide where to place the tokens on their boards.
 And the game is set up! Ready... Fight!
 
-4.3 Gameplay
+**4.3 Gameplay**
 
- 1st turn (Joey)
+*1st turn (Joey)*
+
 As this is the first turn of the game, Joey has the initiative. He will risk and try to launch a quick attack, he moves the left foot token to (A) and plays the following card:
 [DRAWING]
 He had to move 1 token (left foot), so that the 3 tokens were placed as indicated in the attack’s requisite pose. And after playing the card, he moves also the sword token as indicated in the card’s sword trajectory.
 
-2nd turn (Rachel)
+*2nd turn (Rachel)*
+
 Rachel is threatened, because last turn Joey played an attack card. And she remembers Joey played the attack by just moving 1 token. So Rachel can only play a defense card moving 1 token at most. Luckily, she has one card she can play. She moves the sword token to (2) and plays the following defense:
 [DRAWING]
 She also moves the sword token as indicated in the card’s sword trajectory. The power of her defense (4) is, however, lower than Joey’s attack (6), so she does not win the initiative, and the next turn is going to be played regularly by Joey.
 
-3rd turn (Joey)
+*3rd turn (Joey)*
+
 Joey has the initiative again. His last attack did not score, but he will try it again. He moves 2 tokens this time: the right foot to (C ) and the sword to (4); and then plays the following attack:
 [DRAWING]
 
-4th turn (Rachel)
+*4th turn (Rachel)*
+
 Well, Rachel is threatened again. But this time, she feels more confident. She will play a defense without needing to move any token in her board:
 [DRAWING]
 The power of her defense is now greater than the power of Joey’s attack, she wins the initiative, and she will play next turn!
 
-5th turn (Rachel again)
+*5th turn (Rachel again)*
+
 Now Rachel has the initiative! But she does not see any opportunity of attack in her hand. So, instead of playing a card, she’ll try a new strategy. She will move 2 tokens and leave her fighter prepared to play the defense card she has in hand:
 [DRAWING]
 After that she passes the initiative to Joey, thus, triggering a draw event.
 
-Initiative passed and draw event
+*Initiative passed and draw event*
+
 As the initiative has been passed, both players remove the 2 cards they’ve played and put them on their respective discard piles face-up. Then, the drawing event takes place and both players draw as many cards as necessary to have 3 cards in their hands. Rachel and Joey both have 1 card in hand, so they will draw 2 cards each.
 
-6th turn (Joey)
+*6th turn (Joey)*
+
 So Joey has the initiative again! And his hand looks like this now:
 [DRAWING]
 This time, he will be more cautious: he will build an attacking strategy. He places his tokens….. 
 
-
-
-
-5 TIPS AND TRICKS
-
-This means that the players can somehow anticipate the opponent’s intentions, based on the position of the tokens on his or her board! And also, a player can try to hide his or her plans or try to trick the opponent by strategically moving the tokens on the board.
-
+...
