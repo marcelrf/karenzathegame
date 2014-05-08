@@ -47,9 +47,17 @@ The cards represent the warriors martial techniques. Each warrior has a distinct
 It’s a small drawing of the board (with some tokens on it) displayed in the low half of the card. It represents the pose in which the warrior must be in order to perform the technique. That means: to be able to play a card, the tokens in the board must be placed as specified in the card’s requisite pose!
 [DRAWING]
 
-**2.5 The sword trajectory**
+**2.5 Fulfilling the requisite pose**
 
-On the same drawing containing the requisite pose, there is a trace of the sword trajectory, that indicates the starting point and ending point of the sword.
+To be able to play a card, the tokens on your board must be placed in the position indicated by the requisite pose of the card in question. The requisite pose will always specify the position of the sword token, and will sometimes specify the position of the left and/or right foot tokens. If any foot token is not specified in the requisite pose, it means you can play the card regardless of its position on the board.
+
+**2.6 The sword trajectory**
+
+On the same drawing containing the requisite pose, there is a trace of the sword trajectory. When playing a card, the player will imediately move the sword token as indicated by the trajectory trace.
+
+**2.7 The requisite miniature**
+
+Just below the type and power of the cards, there is a miniature of the card's requisite pose. It is an exact copy of its older brother. And it is very helpful when analyzing the hand, because the player doesn't need to shift the cards to see the big drawing.
 
 3 Gameplay
 ----------
@@ -65,10 +73,6 @@ The game is organized in turns. These alternate normally between players (one pl
 **3.3 Move-tokens phase**
 
 In this phase, the player can optionally relocate any token on the board (0, 1, 2 or 3). Reason for this? To fulfill the requisite pose to play an attack or defense. The only restrictions are: foot tokens always occupy a guard square (only one token per square); and the sword token always occupies a sword space end-point. Be careful! In some cases the number of maximum allowed moves can be less than 3 (Read on, Lizzie!). 
-
-**3.6 Fulfilling the requisite pose**
-
-To be able to play a card, the tokens on your board must be placed in the position indicated by the requisite pose of the card in question. The requisite pose will always specify the position of the sword token, and will sometimes specify the position of the left and/or right foot tokens. If any foot token is not specified in the requisite pose, it means you can play the card regardless of its position on the board.
 
 **3.4 Play-cards phase**
 
@@ -102,7 +106,7 @@ Every time a player passes the initiative, a unique thing happens: a drawing eve
 
 The game ends when a player (the winner) scores 10 or more points. It also immediately ends if, in a drawing event, a player should draw a card and can not (because his or her deck is empty). In this case, the player that can't draw loses the game. If both players can't draw up to 5 cards in the same drawing event, guess what: the game is a... draw!
 
-4 Example Game
+4 Example game
 --------------
 
 **4.1 Introduction**
@@ -162,5 +166,20 @@ Both players have only one card in hand, so they decide not to discard. Then the
 So Joey has the initiative again! And his hand looks like this now:
 [DRAWING]
 This time, he will be more cautious: he will build an attacking strategy. He places his tokens….. 
+
+...
+
+4 Game variations
+-----------------
+
+**4.1 Precontructed deck vs. custom deck**
+
+Karenza The Game has many preconstructed decks (each deck belongs to a different warrior), and any one of them can play against any one other. However, if both players wish to mix cards from different decks, there's no problem with that, as long as both players have the right to do so. In this case, they'll have to choose any 30 cards from the whole Karenza The Game collection.
+
+**4.2 One-round game vs. multi-round game**
+
+...
+
+**4.3 Two-player game vs. multiplayer championship**
 
 ...
