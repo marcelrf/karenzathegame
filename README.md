@@ -23,7 +23,7 @@ Karenza is a turn-based game for 2 or more players. In each turn, the players wi
 
 **1.4 Object**
 
-To score 10 points before the opponent does, or be the one with the highest score when the game ends.
+To score 10 points before the opponent does.
 
 
 2 The board and the cards
@@ -44,7 +44,7 @@ The cards represent the warriors martial techniques. Each warrior has a distinct
 
 **2.4 The card’s requisite pose**
 
-It’s a small drawing of the board (with the tokens on it) displayed in the low half of the card. It represents the pose in which the warrior must be in order to perform the technique. That means: to be able to play a card, the tokens in the board must be placed like in the card’s requisite pose!
+It’s a small drawing of the board (with some tokens on it) displayed in the low half of the card. It represents the pose in which the warrior must be in order to perform the technique. That means: to be able to play a card, the tokens in the board must be placed as specified in the card’s requisite pose!
 [DRAWING]
 
 **2.5 The sword trajectory**
@@ -56,7 +56,7 @@ On the same drawing containing the requisite pose, there is a trace of the sword
 
 **3.1 Game setup**
 
-Each player shuffles his or her own deck, offers it to the opponent for him or her to cut, then places it face-down on the table and draws 7 cards. After that, the players decide who will open the game (for example by flipping a coin). The opening player will place the tokens on the board as preferred, and only then the other player will do the same. And the game is set up, the opening player will start!
+Each player shuffles his or her own deck, offers it to the opponent for him or her to cut, then places it face-down on the table and draws 5 cards. After that, the players decide who will open the game (for example by flipping a coin). The opening player will place the tokens on the board as preferred, and only then the other player will do the same. And the game is set up, the opening player will start!
 
 **3.2 The turns**
 
@@ -64,23 +64,27 @@ The game is organized in turns. These alternate normally between players (one pl
 
 **3.3 Move-tokens phase**
 
-In this phase, the player can optionally relocate any token on the board. The only restrictions are: foot tokens always occupy a guard square (only one token per square); and the sword token always occupies a sword space end-point. Be careful! In some cases the number of maximum allowed moves can be less than 3 (read on!). 
+In this phase, the player can optionally relocate any token on the board (0, 1, 2 or 3). Reason for this? To fulfill the requisite pose to play an attack or defense. The only restrictions are: foot tokens always occupy a guard square (only one token per square); and the sword token always occupies a sword space end-point. Be careful! In some cases the number of maximum allowed moves can be less than 3 (Read on, Lizzie!). 
+
+**3.6 Fulfilling the requisite pose**
+
+To be able to play a card, the tokens on your board must be placed in the position indicated by the requisite pose of the card in question. The requisite pose will always specify the position of the sword token, and will sometimes specify the position of the left and/or right foot tokens. If any foot token is not specified in the requisite pose, it means you can play the card regardless of its position on the board.
 
 **3.4 Play-cards phase**
 
 In this phase, the player can play 1 card (attack or defense). If you choose so, you must immediately move the sword token as indicated by the card’s sword trajectory. Pay attention now, if you moved the sword token in the move-tokens phase of this turn, you unfortunately can not play a card, sorry! Of course, you can choose not to play any card.
 
-**3.5 Having the initiative and being threatened**
+**3.5 Being threatened, having the initiative and passing**
 
-If your opponent played an attack in his or her last turn, it’s said you’re threatened. This means you must defend yourself from the attack, or else your opponent will score. If your opponent did not play an attack in his or her last turn, it’s said you have the initiative and can attack. If you have the initiative and you do not attack in your turn, it’s said  you pass the initiative to the opponent.
+If your opponent played an attack in his or her last turn, it’s said you’re threatened. This means you must defend yourself from the attack, or else your opponent will score. If your opponent did not play an attack in his or her last turn, it’s said you have the initiative and can attack. If you have the initiative and you do not attack in your turn, it’s said you are passing (the initiative to the opponent).
 
 **3.6 Attacking**
 
-You can attack only when you have the initiative (when you’re not threatened). But you can choose not to attack if you wish so. Remember that the tokens in your board must be in the position indicated in a card’s requisite pose before you play an attack. Now concentrate, this is of extreme importance: If you did move some tokens before playing the attack, count how many moves you did, and tell the opponent when you play the card. When you play an attack you place it on the table face-up, so that the opponent can see it.
+You can attack only when you have the initiative (when you’re not threatened). But you can choose not to attack if you wish so. Now this is of extreme importance: If you did move some tokens before playing the attack, count how many moves you did, and tell the opponent when you play the card. When you play an attack you place it on the table face-up, so that the opponent can see it.
 
 **3.7 Defending**
 
-You can defend only when you are threatened (the opponent played an attack last turn). It is not mandatory, just remember that if you do not play a defense when you’re threatened, the opponent will score! The tokens in your board must also be in the position indicated in a card’s requisite pose before you play a defense. And here comes the key: before playing a defense (in the move-tokens phase), you can move at most as many tokens as your opponent moved to play the attack. If the attack that threatens you was played after moving 2 tokens, then you can move up to 2 tokens (any 2 of them). If the attack was played after moving 1 token, you can move just one (any one). And of course, if the attack was played without any moves, you can only play a defense without moving any token! When you play a defense you place it on the table face-up in front of the corresponding attack.
+You can defend only when you are threatened (the opponent played an attack last turn). It is not mandatory, just remember that if you do not play a defense when you’re threatened, the opponent will score! And here comes the key: before playing a defense, in the move-tokens phase, you can move at most as many tokens as your opponent moved to play the attack. If the attack that threatens you was played after moving 2 tokens, then you can move up to 2 tokens (any 2 of them). If the attack was played after moving 1 token, you can move just one (any one). And of course, if the attack was played without any moves, you can only play a defense without moving any token! When you play a defense you place it on the table face-up in front of the corresponding attack.
 
 **3.8 Scoring**
 
@@ -88,26 +92,22 @@ If one player attacks and the other player does not play a defense (either becau
 
 **3.9 Attack and defense resolution**
 
-So what happens when a player attacks, and the other player actually manages to play a defense card? Nobody scores, at least not now! And who will play next turn? It will depend on the power of both cards. If the power of the defense is greater than the power of the attack, the defending player will play next turn. Otherwise (defense power is less or equal than attack power), the attacking player will play next turn. Easy, ain’t it?
+So what happens when a player attacks, and the other player actually manages to play a defense card? Nobody scores, at least not now! And who will play next turn? It will depend on the power of both cards. If the power of the defense is greater or equal than the power of the attack, the defending player will play next turn. Otherwise (defense power is less than attack power), the attacking player will play next turn. Easy, ain’t it?
 
-**3.10 Discarding**
+**3.11 The drawing event**
 
-In your turn, if you have the initiative (see definition above), and you choose not to play a card (or can not play it), you still can optionally discard a card. To discard a card, just pick a card from your hand and put it aside face-up. This action can help you get rid of cards you won’t use. You can use a single pile for all the cards that are put aside in the game, always face-up.
-
-**3.11 Passing the initiative and drawing event**
-
-Every time a player passes the initiative, some things take place: First, all the cards that are on the table are removed and put on the discard pile of the corresponding player. In addition to that, a drawing event takes place. In a drawing event, both players (yes, both!) will draw from their respective decks as many cards as necessary to complete 7 cards in hand. For example: if a player has 2 cards in hand when a drawing event takes place, he (or she) will draw 5 cards (2 + 5 = 7). If a player has 6 cards in hand, he (or she) will draw just 1 card. If a player already has 7 cards in hand, then he or she won’t draw any cards.
+Every time a player passes the initiative, a unique thing happens: a drawing event takes place. In a drawing event, both players (yes, both!) will perform 2 ordered actions: First, discard as many cards as they want from their hands (can be 0); and then, draw from their respective decks as many cards as necessary to complete 5 cards in hand. For example: if a player has 3 cards in hand when a drawing event takes place, he (or she) can discard 1 card and then draw 3 cards (3 - 1 + 3 = 5).
 
 **3.12 The game ends**
 
-The game ends when a player (the winner) scores 10 or more points. It also immediately ends if, in a drawing event, a player should draw a card and can not (because his or her deck is empty). In this case, the player with the highest score wins!
+The game ends when a player (the winner) scores 10 or more points. It also immediately ends if, in a drawing event, a player should draw a card and can not (because his or her deck is empty). In this case, the player that can't draw loses the game. If both players can't draw up to 5 cards in the same drawing event, guess what: the game is a... draw!
 
 4 Example Game
 --------------
 
 **4.1 Introduction**
 
-Let’s consider a game between two imaginary players, say Joey and Rachel. We’ll follow it turn by turn so that you can understand how it goes. For simplicity reasons they will play with only 3 cards in hand. When you play in the real world, remember to use 7 cards!
+Let’s consider a game between two imaginary players, say Joey and Rachel. We’ll follow it turn by turn so that you can understand how it goes. For simplicity reasons they will play with only 3 cards in hand. When you play in the real world, remember to use 5 cards!
 
 **4.2 Setup**
 
@@ -138,24 +138,24 @@ She also moves the sword token as indicated in the card’s sword trajectory. Th
 
 *3rd turn (Joey)*
 
-Joey has the initiative again. His last attack did not score, but he will try it again. He moves 2 tokens this time: the right foot to (C ) and the sword to (4); and then plays the following attack:
+Joey has the initiative again. His last attack did not score, but he will try it again. He moves 2 tokens this time: the right foot to (C) and the sword to (4); and then plays the following attack:
 [DRAWING]
 
 *4th turn (Rachel)*
 
 Well, Rachel is threatened again. But this time, she feels more confident. She will play a defense without needing to move any token in her board:
 [DRAWING]
-The power of her defense is now greater than the power of Joey’s attack, she wins the initiative, and she will play next turn!
+The power of her defense (7) is now greater than the power of Joey’s attack (5), she wins the initiative, and she will play next turn!
 
 *5th turn (Rachel again)*
 
 Now Rachel has the initiative! But she does not see any opportunity of attack in her hand. So, instead of playing a card, she’ll try a new strategy. She will move 2 tokens and leave her fighter prepared to play the defense card she has in hand:
 [DRAWING]
-After that she passes the initiative to Joey, thus, triggering a draw event.
+After that, she passes the initiative to Joey, thus, triggering a draw event.
 
-*Initiative passed and draw event*
+*Draw event*
 
-As the initiative has been passed, both players remove the 2 cards they’ve played and put them on their respective discard piles face-up. Then, the drawing event takes place and both players draw as many cards as necessary to have 3 cards in their hands. Rachel and Joey both have 1 card in hand, so they will draw 2 cards each.
+Both players have only one card in hand, so they decide not to discard. Then they draw as many cards as necessary to have 3 cards in their hands again, so they will draw 2 each.
 
 *6th turn (Joey)*
 
