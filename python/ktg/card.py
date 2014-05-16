@@ -18,28 +18,6 @@ S1, S2, S3, S4 = range(4)
 NO_TYPE, ATTACK, DEFENSE = range(3)
 NO_FOOT, LEFT_FOOT, RIGHT_FOOT = range(3)
 NO_SWORD, SWORD_ORIGIN, SWORD_DESTINY = range(3)
-FRONT, MID, BACK = range(3)
-STRAIGHT, LATERAL, REVERSE = range(3)
-SHORT, LONG = range(2)
-ASCENDANT, HORIZONTAL, DESCENDANT = range(3)
-ALIGNED, SEMI_ALIGNED, NOT_ALIGNED = range(3)
-LEFT_GUARD, FRONT_GUARD, RIGHT_GUARD = range(3)
-
-# feet angles respect horizontal (in degrees)
-FEET_ANGLES = {
-    FA: {FB: 45, FC: 135, FD: 90},
-    FB: {FA: 45, FC: 0, FD: 135},
-    FC: {FA: 135, FB: 0, FD: 45},
-    FD: {FA: 90, FB: 135, FC: 45},
-}
-# trajectory angles respect horizontal (in degrees)
-TRAJECTORY_ANGLES = {
-    S1: {S2: 0, S3: 90, S4: 135},
-    S2: {S1: 0, S3: 45, S4: 90},
-    S3: {S1: 90, S2: 45, S4: 0},
-    S4: {S1: 135, S2: 90, S3: 0},
-}
-
 FEET_POSITIONS = [FA, FB, FC, FD]
 SWORD_POSITIONS = [S1, S2, S3, S4]
 
@@ -196,76 +174,23 @@ class Card(object):
         return (
             self.type in [ATTACK, DEFENSE] and
             self.power in range(1, 10) and
-            self.feet.count(LEFT_FOOT) == 1 and
-            self.feet.count(RIGHT_FOOT) == 1 and
             self.sword.count(SWORD_ORIGIN) == 1 and
             self.sword.count(SWORD_DESTINY) == 1
         )
 
-    def feet_level(self):
-        # assumes the card is legal
-        if NO_FOOT not in [self.feet[FA], self.feet[FD]]: return MID
-        elif self.feet[FA] != NO_FOOT: return FRONT
-        elif self.feet[FD] != NO_FOOT: return BACK
-        else: return MID
-
-    def feet_orientation(self):
-        # assumes the card is legal
-        if LEFT_FOOT == self.feet[FB] or RIGHT_FOOT == self.feet[FC]:
-            return STRAIGHT
-        elif LEFT_FOOT == self.feet[FC] or RIGHT_FOOT == self.feet[FB]:
-            return REVERSE
-        else: return LATERAL
-
-    def trajectory_length(self):
-        # assumes the card is legal
-        if (SWORD_ORIGIN == self.sword[S1] and SWORD_DESTINY == self.sword[S4] or
-            SWORD_ORIGIN == self.sword[S4] and SWORD_DESTINY == self.sword[S1] or
-            SWORD_ORIGIN == self.sword[S2] and SWORD_DESTINY == self.sword[S3] or
-            SWORD_ORIGIN == self.sword[S3] and SWORD_DESTINY == self.sword[S2]):
-            return LONG
-        else: return SHORT
-
-    def trajectory_direction(self):
-        # assumes the card is legal
-        if SWORD_ORIGIN in [self.sword[S1], self.sword[S2]]:
-            if SWORD_DESTINY in [self.sword[S1], self.sword[S2]]:
-                return HORIZONTAL
-            else: return DESCENDANT
-        elif SWORD_ORIGIN in [self.sword[S3], self.sword[S4]]:
-            if SWORD_DESTINY in [self.sword[S1], self.sword[S2]]:
-                return ASCENDANT
-            else: return HORIZONTAL
-
-    def feet_angle(self):
-        # assumes the card is legal
-        return FEET_ANGLES[self.left_foot][self.right_foot]
-
-    def trajectory_angle(self):
-        # assumes the card is legal
-        return TRAJECTORY_ANGLES[self.sword_origin][self.sword_destiny]
-
-    def alignment(self):
-        alignment = abs(self.feet_angle() - self.trajectory_angle())
-        if alignment == 0: return ALIGNED
-        elif alignment in [45, 135]: return SEMI_ALIGNED
-        else: return NOT_ALIGNED
-
-    def guard_side(self):
-        if self.left_foot == FA or self.right_foot == FD:
-            return LEFT_GUARD
-        elif self.right_foot == FA or self.left_foot == FD:
-            return RIGHT_GUARD
-        else: return FRONT_GUARD
+    def leads_to(self, other):
+        # assumes the cards are legal
+        return self.sword_destiny == other.sword_origin
 
     def distance_to(self, other):
-        # assumes the card is legal
+        # assumes the cards are legal and self leads to other
         conditions = [
-            self.left_foot != other.left_foot,
-            self.right_foot != other.right_foot,
-            (self.left_foot == other.right_foot and
-             self.right_foot == other.left_foot),
-            self.sword_destiny != other.sword_origin,
+            self.left_foot is not None and other.left_foot is not None and self.left_foot != other.left_foot,
+            self.right_foot is not None and other.right_foot is not None and self.right_foot != other.right_foot,
+            (
+                self.left_foot is not None and self.right_foot is not None and
+                self.left_foot == other.right_foot and self.right_foot == other.left_foot
+            )
         ]
         distance = map(lambda x: 1 if x else 0, conditions)
         return reduce(lambda x, y: x + y, distance)

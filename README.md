@@ -111,7 +111,7 @@ The game ends when a player (the winner) scores 10 or more points. It also immed
 
 **4.1 Introduction**
 
-Let’s consider a game between two imaginary players, say Joey and Rachel. We’ll follow it turn by turn so that you can understand how it goes. For simplicity reasons they will play with only 3 cards in hand. When you play in the real world, remember to use 5 cards!
+Let’s consider a game between two imaginary players, say Joey and Rachel. We’ll follow it turn by turn so that you can understand how it goes. For simplicity reasons they will play with only 3 cards in hand. When you play in the real world, remember to play with 5!
 
 **4.2 Setup**
 

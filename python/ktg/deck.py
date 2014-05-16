@@ -22,10 +22,10 @@ class Deck(object):
 
     def __eq__(self, other):
         for card in self.cards:
-            if card not in other.cards:
+            if self.cards.count(card) != other.cards.count(card):
                 return False
         for card in other.cards:
-            if card not in self.cards:
+            if self.cards.count(card) != other.cards.count(card):
                 return False
         return True
 
@@ -41,12 +41,10 @@ class Deck(object):
         return "[%s]" % ', '.join(card_jsons)
 
     def add(self, card):
-        if card not in self.cards:
-            self.cards.append(card)
+        self.cards.append(card)
 
     def remove(self, card):
-        if card in self.cards:
-            self.cards.remove(card)
+        self.cards.remove(card)
 
     def draw(self):
         chosen_card = random.choice(self.cards)
@@ -67,50 +65,37 @@ class Deck(object):
                 return False
         return True
 
-    def mean_power(self):
+    def get_power(self):
         total = 0
         for card in self.cards:
             total += card.power
-        return float(total) / len(self.cards)
+        return (float(total) / len(self.cards) - 1) / 9
 
-    def power_deviation(self):
-        mean = self.mean_power()
-        total = 0
-        for card in self.cards:
-            total += abs(card.power - mean)
-        return float(total) / len(self.cards)
-
-    def mean_distance(self):
-        total = 0
+    def get_speed(self):
+        total, count = 0, 0
         for card_1 in self.cards:
             for card_2 in self.cards:
-                if card_1 != card_2:
+                if card_1.leads_to(card_2):
                     total += card_1.distance_to(card_2)
-        deck_size = len(self.cards)
-        return float(total) / (deck_size * (deck_size - 1))
+                    count += 1
+        return 1 - float(total) / count / 2
 
-    def distance_deviation(self):
-        mean = self.mean_distance()
-        total = 0
+    def get_flow(self):
+        total, count = 0, 0
         for card_1 in self.cards:
             for card_2 in self.cards:
                 if card_1 != card_2:
-                    total += abs(card_1.distance_to(card_2) - mean)
-        deck_size = len(self.cards)
-        return float(total) / (deck_size * (deck_size - 1))
+                    if card_1.leads_to(card_2):
+                        total += 1
+                    count += 1
+        return float(total) / count * 2
 
-    def feet_balance(self):
-        feet_count = [[0, 0] for i in range(5)]
+    def get_shadow(self):
+        sword_count = [[0, 0] for i in range(4)]
         for card in self.cards:
-            feet_count[card.left_foot][0] += 1
-            feet_count[card.right_foot][1] += 1
-        feet_sum = sum(map(lambda x: pow(x[0] - x[1], 2), feet_count))
-        return feet_sum / (2.0 * pow(len(self.cards), 2))
-
-    def sword_balance(self):
-        sword_count = [[0, 0] for i in range(5)]
-        for card in self.cards:
-            sword_count[card.sword_origin][0] += 1
-            sword_count[card.sword_destiny][0] += 1
-        sword_sum = sum(map(lambda x: pow(x[0] - x[1], 2), sword_count))
-        return 1 - sword_sum / (2.0 * pow(len(self.cards), 2))
+            if card.type == ATTACK:
+                sword_count[card.sword_origin][0] += 1
+            elif card.type == DEFENSE:
+                sword_count[card.sword_origin][1] += 1
+        sword_sum = sum(map(lambda x: abs(x[0] - x[1]), sword_count))
+        return 1 - float(sword_sum) / len(self.cards)
