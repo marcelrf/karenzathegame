@@ -3,7 +3,7 @@
 import player
 import card
 
-CARDS_IN_HAND = 7
+CARDS_IN_HAND = 5
 
 class Game(object):
 

@@ -31,15 +31,15 @@ class Player(object):
         )
 
     def __str__(self):
-        text  = str(self.hand)
-        text += str(self.board) + "\n"
+        text  = str(self.board) + "\n"
+        text += str(self.hand)
         text += 'Cards in deck: ' + str(len(self.deck.cards)) + ', '
         text += 'Score: ' + str(self.score)
         return text
 
     def setup(self, deck_json, card_number):
         self.deck = deck.Deck(deck_json)
-        self.hand = hand.Hand()
+        self.hand = hand.Hand([])
         self.board = board.Board()
         self.board.random()
         self.score = 0

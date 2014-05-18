@@ -3,6 +3,7 @@
 from card import *
 from copy import copy
 import random
+import json
 
 class Deck(object):
 
@@ -10,8 +11,8 @@ class Deck(object):
         if json_text is None:
             self.cards = []
         else:
-            card_jsons = json_text[2:-2].split('}, {')
-            self.cards = map(lambda x: Card('{' + x + '}'), card_jsons)
+            card_infos = json.loads(json_text)
+            self.cards = map(lambda x: Card(json.dumps(x)), card_infos)
 
     def __copy__(self):
         other = Deck()

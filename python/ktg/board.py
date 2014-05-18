@@ -17,9 +17,6 @@ S1, S2, S3, S4 = range(4)
 NO_FOOT, LEFT_FOOT, RIGHT_FOOT = range(3)
 NO_SWORD, SWORD = range(2)
 
-FEET_POSITIONS = [FA, FB, FC, FD]
-SWORD_POSITIONS = [S1, S2, S3, S4]
-
 class Board(object):
 
     def __init__(self):
@@ -130,4 +127,3 @@ class Board(object):
         ]
         distance = map(lambda x: 1 if x else 0, conditions)
         return reduce(lambda x, y: x + y, distance)
-
