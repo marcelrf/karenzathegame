@@ -77,7 +77,7 @@ class Card(object):
         text += "'-------------'"
         instantiation = (
             type_codes[self.type],
-            self.power,
+            self.power or 0,
             foot_codes[self.feet[FA]],
             sword_codes[self.sword[S1]],
             sword_codes[self.sword[S2]],

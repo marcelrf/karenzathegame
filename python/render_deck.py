@@ -33,8 +33,8 @@ def to_html(element, fighter, style=True):
     if isinstance(element, Card):
         card = element
         card_types = [None, 'attack', 'defense']
-        feet_classes = ['fa', 'fb', 'fc', 'fd', 'fe']
-        sword_classes = ['s1', 's2', 's3', 's4', 's5']
+        feet_classes = ['fa', 'fb', 'fc', 'fd', 'fnone']
+        sword_classes = ['s1', 's2', 's3', 's4']
         text = """
              <div class="card">
                 <div class="type %s">
@@ -68,11 +68,11 @@ def to_html(element, fighter, style=True):
             card.power,
             ' '.join(map(lambda x: x.capitalize(), fighter.split('_'))),
             fighter,
-            feet_classes[card.left_foot or 0],
-            feet_classes[card.right_foot or 0],
+            feet_classes[card.left_foot if card.left_foot is not None else 4],
+            feet_classes[card.right_foot if card.right_foot is not None else 4],
             sword_classes[card.sword_origin],
-            feet_classes[card.left_foot or 0],
-            feet_classes[card.right_foot or 0],
+            feet_classes[card.left_foot if card.left_foot is not None else 4],
+            feet_classes[card.right_foot if card.right_foot is not None else 4],
             sword_classes[card.sword_origin],
             sword_classes[card.sword_origin],
             sword_classes[card.sword_destiny],
@@ -181,6 +181,7 @@ CARD_STYLE = """
 .foot.fb { left: 1.58cm; top: 6.08cm; }
 .foot.fc { left: 4.62cm; top: 6.03cm; }
 .foot.fd { left: 3.11cm; top: 7.57cm; }
+.foot.fnone { display: none; }
 .sword {
     width: 0.9cm;
     height: 0.9cm;
@@ -194,7 +195,6 @@ CARD_STYLE = """
 .sword.s2 { left: 4.12cm; top: 5cm; }
 .sword.s3 { left: 2.06cm; top: 7.1cm; }
 .sword.s4 { left: 4.17cm; top: 7.1cm; }
-.sword.s5 { left: 3.15cm; top: 7.64cm; }
 .min-foot {
     position: absolute;
 }
@@ -202,7 +202,7 @@ CARD_STYLE = """
 .min-foot.fb { left: 0.25cm; top: 1.65cm; }
 .min-foot.fc { left: 0.99cm; top: 1.63cm; }
 .min-foot.fd { left: 0.6cm; top: 1.99cm; }
-.min-foot.fe { left: 0.85cm; top: 1.97cm; }
+.min-foot.fnone { display: none; }
 .min-sword {
     position: absolute;
 }
@@ -210,7 +210,6 @@ CARD_STYLE = """
 .min-sword.s2 { left: 0.85cm; top: 1.39cm; }
 .min-sword.s3 { left: 0.36cm; top: 1.87cm; }
 .min-sword.s4 { left: 0.85cm; top: 1.87cm; }
-.min-sword.s5 { left: 0.6cm; top: 2cm; }
 .orange {
     color: orange;
 }
@@ -259,15 +258,6 @@ CARD_STYLE = """
     left: 0.76cm;
     top: 4.48cm;
 }
-.trajectory.s1-s5,
-.trajectory.s5-s1 {
-    background-image: url('images/long.png');
-    -moz-transform: rotate(-72deg);  /* FF3.5+ */
-    -o-transform: rotate(-72deg);  /* Opera 10.5 */
-    -webkit-transform: rotate(-72deg);  /* Saf3.1+, Chrome */
-    left: 1.9cm;
-    top: 3.8cm;
-}
 .trajectory.s2-s3,
 .trajectory.s3-s2 {
     background-image: url('images/long.png');
@@ -283,15 +273,6 @@ CARD_STYLE = """
     left: 0.65cm;
     top: 3.75cm;
 }
-.trajectory.s2-s5,
-.trajectory.s5-s2 {
-    background-image: url('images/long.png');
-    -moz-transform: rotate(144deg);  /* FF3.5+ */
-    -o-transform: rotate(144deg);  /* Opera 10.5 */
-    -webkit-transform: rotate(144deg);  /* Saf3.1+, Chrome */
-    left: 0.35cm;
-    top: 3.75cm;
-}
 .trajectory.s3-s4,
 .trajectory.s4-s3 {
     background-image: url('images/short.png');
@@ -300,24 +281,6 @@ CARD_STYLE = """
     -webkit-transform: rotate(-90deg);  /* Saf3.1+, Chrome */
     left: 1.4cm;
     top: 3.6cm;
-}
-.trajectory.s3-s5,
-.trajectory.s5-s3 {
-    background-image: url('images/short.png');
-    -moz-transform: rotate(-73deg);  /* FF3.5+ */
-    -o-transform: rotate(-73deg);  /* Opera 10.5 */
-    -webkit-transform: rotate(-73deg);  /* Saf3.1+, Chrome */
-    left: 1.9cm;
-    top: 3.78cm;
-}
-.trajectory.s4-s5,
-.trajectory.s5-s4 {
-    background-image: url('images/short.png');
-    -moz-transform: rotate(-144deg);  /* FF3.5+ */
-    -o-transform: rotate(-144deg);  /* Opera 10.5 */
-    -webkit-transform: rotate(-144deg);  /* Saf3.1+, Chrome */
-    left: 1.1cm;
-    top: 3.2cm;
 }
 .min-trajectory.s1-s2,
 .min-trajectory.s2-s1 {
@@ -343,15 +306,6 @@ CARD_STYLE = """
     left: 0.23cm;
     top: 1.44cm;
 }
-.min-trajectory.s1-s5,
-.min-trajectory.s5-s1 {
-    background-image: url('images/min-long.png');
-    -moz-transform: rotate(-72deg);  /* FF3.5+ */
-    -o-transform: rotate(-72deg);  /* Opera 10.5 */
-    -webkit-transform: rotate(-72deg);  /* Saf3.1+, Chrome */
-    left: 0.35cm;
-    top: 1.4cm;
-}
 .min-trajectory.s2-s3,
 .min-trajectory.s3-s2 {
     background-image: url('images/min-long.png');
@@ -367,15 +321,6 @@ CARD_STYLE = """
     left: 0.23cm;
     top: 1.4cm;
 }
-.min-trajectory.s2-s5,
-.min-trajectory.s5-s2 {
-    background-image: url('images/min-long.png');
-    -moz-transform: rotate(144deg);  /* FF3.5+ */
-    -o-transform: rotate(144deg);  /* Opera 10.5 */
-    -webkit-transform: rotate(144deg);  /* Saf3.1+, Chrome */
-    left: 0.15cm;
-    top: 1.37cm;
-}
 .min-trajectory.s3-s4,
 .min-trajectory.s4-s3 {
     background-image: url('images/min-short.png');
@@ -384,24 +329,6 @@ CARD_STYLE = """
     -webkit-transform: rotate(-90deg);  /* Saf3.1+, Chrome */
     left: 0.25cm;
     top: 1.4cm;
-}
-.min-trajectory.s3-s5,
-.min-trajectory.s5-s3 {
-    background-image: url('images/min-short.png');
-    -moz-transform: rotate(-73deg);  /* FF3.5+ */
-    -o-transform: rotate(-73deg);  /* Opera 10.5 */
-    -webkit-transform: rotate(-73deg);  /* Saf3.1+, Chrome */
-    left: 0.33cm;
-    top: 1.39cm;
-}
-.min-trajectory.s4-s5,
-.min-trajectory.s5-s4 {
-    background-image: url('images/min-short.png');
-    -moz-transform: rotate(-144deg);  /* FF3.5+ */
-    -o-transform: rotate(-144deg);  /* Opera 10.5 */
-    -webkit-transform: rotate(-144deg);  /* Saf3.1+, Chrome */
-    left: 0.28cm;
-    top: 1.31cm;
 }
 </style>
 """
