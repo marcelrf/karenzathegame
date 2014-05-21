@@ -29,7 +29,50 @@ def play_game(deck_json_1, deck_json_2):
         else: log("Player has the initiative!")
         
         move_feet_phase(g)
-        play_card_phase(g)
+        played = play_card_phase(g)
+        move_sword_phase(g, played)
+
+        if not played:
+            discard_phase(g)
+            if not g.player_is_threatened():
+                g.draw_event()
+            g.change_turn()
+    log("Game ended. Player1: %s, Player2: %s" % (g.player1.score, g.player2.score))
+
+def discard_phase(g):
+    player = g.current_player()
+    if len(player.hand.cards) > 0:
+        log("Discard phase")
+        while True:
+            log("Select card to discard (1, 2, 3, 4, 5)")
+            card = int(raw_input('Option:')) - 1
+            if card in range(len(player.hand.cards)):
+                card = player.hand.cards[card]
+                player.hand.cards.remove(card)
+                print g
+                return
+            else:
+                log('Invalid option, retry!')
+                continue
+
+def move_sword_phase(g, played):
+    if not played:
+        log("Move sword phase")
+        while True:
+            log("Select sword destiny (1, 2, 3, 4) or skip (s)")
+            destiny = raw_input('Option:')
+            if destiny == 's':
+                return
+            elif destiny == '1': destiny = 0
+            elif destiny == '2': destiny = 1
+            elif destiny == '3': destiny = 2
+            elif destiny == '4': destiny = 3
+            else:
+                log('Invalid option, retry!')
+                continue
+            g.apply_moves([["sword", destiny]])
+            print g
+            return
 
 def move_feet_phase(g):
     if not g.player_is_threatened() or g.last_moved > 0:
@@ -71,11 +114,14 @@ def play_card_phase(g):
             playable.append(card)
     if len(playable) > 0:
         log("Play card phase")
-        played = False
+        played = None
         while not played:
             log("Select card to play (1, 2, 3, 4, 5) or skip (s)")
             card = raw_input('Option:')
             if card == 's':
+                if playable_type == C.DEFENSE:
+                    g.score()
+                    log("SCORE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 break
             else:
                 card = int(card) - 1
@@ -84,12 +130,15 @@ def play_card_phase(g):
                     player.board.distance_to(player.hand.cards[card]) == 0):
                     card = player.hand.cards[card]
                     g.play_card(card)
-                    played = True
+                    played = card
                     print g
+                    return played
                 else:
                     log('Invalid option, retry!')
                     continue
-
+    elif playable_type == C.DEFENSE:
+        g.score()
+        log("SCORE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
 
 
