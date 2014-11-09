@@ -89,6 +89,17 @@ class Card(object):
         )
         return (text % instantiation)
 
+    def reverse_str(self):
+        text  = ".-------------.\n"
+        text += "|             |\n"
+        text += "|             |\n"
+        text += "|             |\n"
+        text += "|             |\n"
+        text += "|             |\n"
+        text += "|             |\n"
+        text += "'-------------'"
+        return text
+
     def to_json(self):
         return json.dumps({
             "type": self.type,
@@ -162,10 +173,9 @@ class Card(object):
     def random(self):
         self.type = random.randint(1, 2)
         self.power = random.randint(1, 9)
-        feet_choices = range(4) + [None]
+        feet_choices = range(4)
         self.left_foot = random.choice(feet_choices)
         feet_choices.pop(self.left_foot)
-        if self.left_foot is None: feet_choices.append(None)
         self.right_foot = random.choice(feet_choices)
         sword_choices = range(4)
         self.sword_origin = random.choice(sword_choices)
@@ -177,22 +187,19 @@ class Card(object):
             self.type in [ATTACK, DEFENSE] and
             self.power in range(1, 10) and
             self.sword.count(SWORD_ORIGIN) == 1 and
-            self.sword.count(SWORD_DESTINY) == 1
+            self.sword.count(SWORD_DESTINY) == 1 and
+            self.feet.count(LEFT_FOOT) == 1 and
+            self.sword.count(RIGHT_FOOT) == 1
         )
 
-    def leads_to(self, other):
-        # assumes the cards are legal
-        return self.sword_destiny == other.sword_origin
-
     def distance_to(self, other):
-        # assumes the cards are legal and self leads to other
+        # assumes the cards are legal
         conditions = [
-            self.left_foot is not None and other.left_foot is not None and self.left_foot != other.left_foot,
-            self.right_foot is not None and other.right_foot is not None and self.right_foot != other.right_foot,
-            (
-                self.left_foot is not None and self.right_foot is not None and
-                self.left_foot == other.right_foot and self.right_foot == other.left_foot
-            )
+            self.left_foot != other.left_foot,
+            self.right_foot != other.right_foot,
+            (self.left_foot == other.right_foot and
+             self.right_foot == other.left_foot),
+            self.sword != other.sword_origin,
         ]
         distance = map(lambda x: 1 if x else 0, conditions)
         return reduce(lambda x, y: x + y, distance)

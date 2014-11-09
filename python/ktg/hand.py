@@ -18,20 +18,31 @@ class Hand(object):
         return self.cards == other.cards
 
     def __str__(self):
-        text = ""
+        lines = []
         if len(self.cards) > 0:
             card_texts = map(lambda x: str(x).split("\n"), self.cards)
             while len(card_texts[0]) > 0:
+                line = ""
                 for i in range(len(card_texts)):
-                    text += card_texts[i].pop(0)
-                text += '\n'
-        return text
+                    line += card_texts[i].pop(0)
+                lines.append(line)
+        return "\n".join(lines)
 
-    def size(self):
+    def __len__(self):
         return len(self.cards)
+
+    def card_at(self, index):
+        if index > len(self.cards):
+            raise Exception('Bad index')
+        return self.cards[index - 1]
 
     def add(self, card):
         self.cards.append(card)
 
-    def remove(self, card):
-        self.cards.remove(card)
+    def remove(self, index):
+        if index > len(self.cards):
+            raise Exception('Bad index')
+        del self.cards[index - 1]
+
+    def contains(self, card):
+        return card in self.cards

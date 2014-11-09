@@ -127,3 +127,8 @@ class Board(object):
         ]
         distance = map(lambda x: 1 if x else 0, conditions)
         return reduce(lambda x, y: x + y, distance)
+
+    def move_sword_as_in(self, card):
+        if self.sword != card.sword_origin:
+            raise Exception("Card not playable")
+        self.sword = card.sword_destiny

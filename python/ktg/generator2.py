@@ -96,9 +96,9 @@ def get_all_trajectories():
 
 def get_all_guards():
     all_cards = []
-    for left_foot in [FA, FB, FD, None]:
-        for right_foot in [FA, FC, FD, None]:
-            if left_foot != right_foot or left_foot is None:
+    for left_foot in [FA, FB, FD]:
+        for right_foot in [FA, FC, FD]:
+            if left_foot != right_foot:
                 card = Card()
                 card.left_foot = left_foot
                 card.right_foot = right_foot

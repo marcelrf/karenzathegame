@@ -37,6 +37,9 @@ class Deck(object):
         text += "==============="
         return text
 
+    def __len__(self):
+        return len(self.cards)
+
     def to_json(self):
         card_jsons = map(lambda x: x.to_json(), self.cards)
         return "[%s]" % ', '.join(card_jsons)
@@ -72,31 +75,12 @@ class Deck(object):
             total += card.power
         return (float(total) / len(self.cards) - 1) / 9
 
-    def get_speed(self):
-        total, count = 0, 0
-        for card_1 in self.cards:
-            for card_2 in self.cards:
-                if card_1.leads_to(card_2):
-                    total += card_1.distance_to(card_2)
-                    count += 1
-        return 1 - float(total) / count / 2
-
     def get_flow(self):
         total, count = 0, 0
         for card_1 in self.cards:
             for card_2 in self.cards:
                 if card_1 != card_2:
-                    if card_1.leads_to(card_2):
+                    if card_1.distance_to(card_2) <= 1:
                         total += 1
                     count += 1
         return float(total) / count * 2
-
-    def get_shadow(self):
-        sword_count = [[0, 0] for i in range(4)]
-        for card in self.cards:
-            if card.type == ATTACK:
-                sword_count[card.sword_origin][0] += 1
-            elif card.type == DEFENSE:
-                sword_count[card.sword_origin][1] += 1
-        sword_sum = sum(map(lambda x: abs(x[0] - x[1]), sword_count))
-        return 1 - float(sword_sum) / len(self.cards)
