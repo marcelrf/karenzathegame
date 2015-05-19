@@ -85,8 +85,10 @@ def main():
     # initialize counters
     bouts_won, bouts_won_score = 0, 0
     bouts_lost, bouts_lost_score = 0, 0
-    bouts_tied = 0
-    combo_hist = defaultdict(lambda: 0)
+    home_drawn = defaultdict(lambda: 0)
+    away_drawn = defaultdict(lambda: 0)
+    home_used = defaultdict(lambda: 0)
+    away_used = defaultdict(lambda: 0)
     
     # loop for hand draw samples
     samples = []
@@ -97,44 +99,65 @@ def main():
         for _ in range(CARDS_IN_HAND):
             home_hand.add(home_deck.draw())
             away_hand.add(away_deck.draw())
+
+        # store drawn cards stats
+        for card in home_hand.cards:
+            home_drawn[str(card)] += 1
+        for card in away_hand.cards:
+            away_drawn[str(card)] += 1
+
+        # one side experiment
         home_player = Player(home_hand)
         away_player = Player(away_hand)
+        home_bout = get_best_bout(home_player, away_player, 'home', True)
+        store_used_cards(home_bout, home_used, away_used)
 
-        # begin experiment
-        bout = get_best_bout(home_player, away_player, 'home', True)
+        # the other side experiment
+        home_player = Player(home_hand)
+        away_player = Player(away_hand)
+        away_bout = get_best_bout(away_player, home_player, 'away', True)
+        store_used_cards(away_bout, home_used, away_used)
         
-        # print result
-        combination = [x if x is not None else Card() for x in bout['combination']]
-        print '======================================='
-        print Hand(combination)
-        print zip(bout['turn_sequence'], bout['score_sequence'])
-        print 'final score:', bout['score']
-        print '======================================='
+        # # print result
+        # for bout in [home_bout, away_bout]:
+        #     combination = [x if x is not None else Card() for x in bout['combination']]
+        #     print '======================================='
+        #     print Hand(combination)
+        #     print zip(bout['turn_sequence'], bout['score_sequence'])
+        #     print 'final score:', bout['score']
+        #     print '======================================='
 
         # get stats
-        if bout['score'] == 0:
-            bouts_tied += 1
-        elif bout['score'] < 0:
-            bouts_lost += 1
-            bouts_lost_score += -bout['score']
-        elif bout['score'] > 0:
+        if home_bout['score'] > 0:
             bouts_won += 1
-            bouts_won_score += bout['score']
+            bouts_won_score += home_bout['score']
+        elif home_bout['score'] < 0:
+            bouts_lost += 1
+            bouts_lost_score += -home_bout['score']
+        if away_bout['score'] < 0:
+            bouts_won += 1
+            bouts_won_score += -away_bout['score']
+        elif away_bout['score'] > 0:
+            bouts_lost += 1
+            bouts_lost_score += away_bout['score']
 
-        combo_hist[str(Hand(combination))] += 1
+    print 'bouts won', ('%.1f' % (float(bouts_won) / ITERATIONS * 50)) + '%', 'with avg score', ('%.1f' % (float(bouts_won_score) / bouts_won))
+    print 'bouts lost', ('%.1f' % (float(bouts_lost) / ITERATIONS * 50)) + '%', 'with avg score', ('%.1f' % (float(bouts_lost_score) / bouts_lost))
 
-    combo_freq_pairs = combo_hist.items()
-    combo_freq_pairs.sort(key=lambda x: -x[1])
-    for i in range(10):
-        combo, freq = combo_freq_pairs[i]
-        print '++++++++++++++++++++++++++++++++++++++++++++'
-        print combo
-        print freq
-        print '++++++++++++++++++++++++++++++++++++++++++++'
+    print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
+    print_used(home_deck, home_drawn, home_used)
+    print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
+    print_used(away_deck, away_drawn, away_used)
 
-    print 'bouts won', bouts_won, float(bouts_won_score) / bouts_won
-    print 'bouts tied', bouts_tied
-    print 'bouts lost', bouts_lost, float(bouts_lost_score) / bouts_lost
+
+def store_used_cards(bout, home_used, away_used):
+    for i in range(len(bout['combination'])):
+        card = bout['combination'][i]
+        turn = bout['turn_sequence'][i]
+        if turn == 'home':
+            home_used[str(card)] += 1
+        elif turn == 'away':
+            away_used[str(card)] += 1
 
 
 def get_deck_dict(file_name):
@@ -178,12 +201,26 @@ def get_best_bout(player, opponent, turn, initial=False):
         player.revert()
 
     max_bout = None
-    for bout in bouts:
-        if (max_bout is None or
-            max_bout['combination'] == [None] or
-            bout['combination'] != [None] and bout['score'] > max_bout['score']):
-            max_bout = bout
+    if initial:
+        for bout in bouts:
+            if (max_bout is None or
+                max_bout['combination'] == [None] or
+                bout['combination'] != [None] and bout['score'] > max_bout['score']):
+                max_bout = bout
+    else:
+        for bout in bouts:
+            if max_bout is None or bout['score'] > max_bout['score']:
+                max_bout = bout
     return max_bout
+
+
+def print_used(deck, drawn, used):
+    card_strs = set([str(card) for card in deck.cards])
+    for card_str in card_strs:
+        print '-----------------'
+        print card_str
+        print float(used[card_str]) / drawn[card_str]
+        print '-----------------'
 
 
 if __name__ == '__main__':
