@@ -1,45 +1,35 @@
 # coding: utf-8
 
 import random
-import json
 
 # card indexes
-# letters for feet positions
 # numbers for sword positions
-#      A
 #   1     2
-# B         C
+#
 #   3     4
-#      D
-FA, FB, FC, FD = range(4)
 S1, S2, S3, S4 = range(4)
 
 # other enumerations
 NO_POWER = None
 NO_TYPE, ATTACK, DEFENSE = range(3)
-NO_FOOT, LEFT_FOOT, RIGHT_FOOT = range(3)
 NO_SWORD, SWORD_ORIGIN, SWORD_DESTINY = range(3)
 
 class Card(object):
 
-    def __init__(self, json_text=None):
-        if json_text is None:
+    def __init__(self, json_object=None):
+        if json_object is None:
             self.type = NO_TYPE
             self.power = NO_POWER
-            self.feet = [NO_FOOT for i in range(4)]
             self.sword = [NO_SWORD for i in range(4)]
         else:
-            json_object = json.loads(json_text)
             self.type = json_object['type']
             self.power = json_object['power']
-            self.feet = json_object['feet']
             self.sword = json_object['sword']
 
     def __copy__(self):
         other = Card()
         other.type = self.type
         other.power = self.power
-        other.feet = list(self.feet)
         other.sword = list(self.sword)
         return other
 
@@ -47,98 +37,55 @@ class Card(object):
         return (
             self.type == other.type and
             self.power == other.power and
-            self.feet == other.feet and
             self.sword == other.sword
         )
 
     def __str__(self):
         type_codes = {
-            ATTACK: 'Attack ',
-            DEFENSE: 'Defense',
-            NO_TYPE: 'Unknown',
-        }
-        foot_codes = {
-            LEFT_FOOT: 'L',
-            RIGHT_FOOT: 'R',
-            NO_FOOT: '·',
+            ATTACK:   'Attack ',
+            DEFENSE:  'Defense',
+            NO_TYPE:  '       ',
         }
         sword_codes = {
-            SWORD_ORIGIN: 'o',
-            SWORD_DESTINY: 'x',
-            NO_SWORD: ' ',
+            SWORD_ORIGIN:   'o',
+            SWORD_DESTINY:  'x',
+            NO_SWORD: '·',
         }
-        text  = ".-------------.\n"
-        text += "| %s (%d) |\n"
-        text += "|      %s      |\n"
-        text += "|   %s     %s   |\n"
-        text += "| %s         %s |\n"
-        text += "|   %s     %s   |\n"
-        text += "|      %s      |\n"
-        text += "'-------------'"
+        text  = '.-------------.\n'
+        text += '| %s (%d) |\n'
+        text += '|             |\n'
+        text += '|   %s     %s   |\n'
+        text += '|             |\n'
+        text += '|   %s     %s   |\n'
+        text += '|             |\n'
+        text += '\'-------------\''
         instantiation = (
             type_codes[self.type],
             self.power or 0,
-            foot_codes[self.feet[FA]],
             sword_codes[self.sword[S1]],
             sword_codes[self.sword[S2]],
-            foot_codes[self.feet[FB]],
-            foot_codes[self.feet[FC]],
             sword_codes[self.sword[S3]],
             sword_codes[self.sword[S4]],
-            foot_codes[self.feet[FD]],
         )
         return (text % instantiation)
 
     def reverse_str(self):
-        text  = ".-------------.\n"
-        text += "|             |\n"
-        text += "|             |\n"
-        text += "|             |\n"
-        text += "|             |\n"
-        text += "|             |\n"
-        text += "|             |\n"
-        text += "'-------------'"
+        text  = '.-------------.\n'
+        text += '|             |\n'
+        text += '|             |\n'
+        text += '|             |\n'
+        text += '|             |\n'
+        text += '|             |\n'
+        text += '|             |\n'
+        text += '\'-------------\''
         return text
 
-    def to_json(self):
-        return json.dumps({
-            "type": self.type,
-            "power": self.power,
-            "feet": self.feet,
-            "sword": self.sword,
-        })
-
-    @property
-    def left_foot(self):
-        if LEFT_FOOT in self.feet:
-            return self.feet.index(LEFT_FOOT)
-        else: return None
-    @left_foot.setter
-    def left_foot(self, value):
-        del self.left_foot
-        if value is not None:
-            self.feet[value] = LEFT_FOOT
-    @left_foot.deleter
-    def left_foot(self):
-        for i in range(4):
-            if self.feet[i] == LEFT_FOOT:
-                self.feet[i] = NO_FOOT
-
-    @property
-    def right_foot(self):
-        if RIGHT_FOOT in self.feet:
-            return self.feet.index(RIGHT_FOOT)
-        else: return None
-    @right_foot.setter
-    def right_foot(self, value):
-        del self.right_foot
-        if value is not None:
-            self.feet[value] = RIGHT_FOOT
-    @right_foot.deleter
-    def right_foot(self):
-        for i in range(4):
-            if self.feet[i] == RIGHT_FOOT:
-                self.feet[i] = NO_FOOT
+    def to_json_object(self):
+        return {
+            'type': self.type,
+            'power': self.power,
+            'sword': self.sword,
+        }
 
     @property
     def sword_origin(self):
@@ -173,10 +120,6 @@ class Card(object):
     def random(self):
         self.type = random.randint(1, 2)
         self.power = random.randint(1, 9)
-        feet_choices = range(4)
-        self.left_foot = random.choice(feet_choices)
-        feet_choices.pop(self.left_foot)
-        self.right_foot = random.choice(feet_choices)
         sword_choices = range(4)
         self.sword_origin = random.choice(sword_choices)
         sword_choices.pop(self.sword_origin)
@@ -184,22 +127,12 @@ class Card(object):
 
     def is_legal(self):
         return (
-            self.type in [ATTACK, DEFENSE] and
+            self.type in range(1, 3) and
             self.power in range(1, 10) and
             self.sword.count(SWORD_ORIGIN) == 1 and
-            self.sword.count(SWORD_DESTINY) == 1 and
-            self.feet.count(LEFT_FOOT) == 1 and
-            self.sword.count(RIGHT_FOOT) == 1
+            self.sword.count(SWORD_DESTINY) == 1
         )
 
-    def distance_to(self, other):
+    def leads_to(self, other):
         # assumes the cards are legal
-        conditions = [
-            self.left_foot != other.left_foot,
-            self.right_foot != other.right_foot,
-            (self.left_foot == other.right_foot and
-             self.right_foot == other.left_foot),
-            self.sword != other.sword_origin,
-        ]
-        distance = map(lambda x: 1 if x else 0, conditions)
-        return reduce(lambda x, y: x + y, distance)
+        return self.sword_destiny == other.sword_origin

@@ -4,7 +4,8 @@ import copy
 
 class Hand(object):
 
-    def __init__(self, cards=[]):
+    def __init__(self, cards=None):
+        if cards is None: cards = []
         self.cards = cards
 
     def __copy__(self):
@@ -20,7 +21,7 @@ class Hand(object):
     def __str__(self):
         lines = []
         if len(self.cards) > 0:
-            card_texts = map(lambda x: str(x).split("\n"), self.cards)
+            card_texts = map(lambda x: (str(x) if x.is_legal() else x.reverse_str()).split("\n"), self.cards)
             while len(card_texts[0]) > 0:
                 line = ""
                 for i in range(len(card_texts)):

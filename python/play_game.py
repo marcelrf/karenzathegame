@@ -17,15 +17,15 @@ def main():
         print g
         log("Turn for: Player%d" % g.turn_number())
         if g.is_pre_turn():
-            place_tokens_phase(g)
+            move_token_phase(g)
             g.change_turn()
         else:
             if g.player_is_threatened(): log("Player is threatened!")
             else: log("Player has the initiative!")
             draw_card_phase(g)
-            move_token_phase(g)
             played = play_card_phase(g)
             if not played:
+                move_token_phase(g)
                 discard_phase(g)
     log("Game ended. Player1: %s, Player2: %s" % (g.player1.score, g.player2.score))
 
@@ -36,67 +36,27 @@ def get_decks():
     deck_json_2 = open(filename_2).read()[:-1]
     return [deck_json_1, deck_json_2]
 
-def place_tokens_phase(g):
-    log("Place tokens phase")
+def move_token_phase(g):
+    log("Place sword phase")
     while True:
-        log("Select left foot (l), right foot (r), sword (s) or done (d)")
-        token = raw_input("Option:")
-        if token == 'l': token = 'left_foot'
-        elif token == 'r': token = 'right_foot'
-        elif token == 's': token = 'sword'
-        elif token == 'd': break
-        else:
-            log('Invalid option, retry!')
-            continue
-        if token == 'sword':
-            log("Select destiny (1, 2, 3, 4) or cancel (c)")
-        else:
-            log("Select destiny (a, b, c, d) or cancel (c)")
+        log("Select destiny (1, 2, 3, 4) or skip (s)")
         position = raw_input('Option:')
         if position in ['a', '1']: position = 0
         elif position in ['b', '2']: position = 1
         elif position in ['c', '3']: position = 2
         elif position in ['d', '4']: position = 3
-        elif position == 'c': continue
+        elif position == 's': continue
         else:
             log('Invalid option, retry!')
             continue
-        g.apply_move(token, position)
-        print g
+        g.apply_move('sword', position)
+        break
+    print g
 
 def draw_card_phase(g):
     g.draw_card()
     print g
     log("You drawed a card")
-    
-def move_token_phase(g):
-    log("Move token phase")
-    while True:
-        log("Select left foot (l), right foot (r), sword (s) or done (d)")
-        token = raw_input("Option:")
-        if token == 'l': token = 'left_foot'
-        elif token == 'r': token = 'right_foot'
-        elif token == 's': token = 'sword'
-        elif token == 'd': break
-        else:
-            log('Invalid option, retry!')
-            continue
-        if token == 'sword':
-            log("Select destiny (1, 2, 3, 4) or cancel (c)")
-        else:
-            log("Select destiny (a, b, c, d) or cancel (c)")
-        position = raw_input('Option:')
-        if position in ['a', '1']: position = 0
-        elif position in ['b', '2']: position = 1
-        elif position in ['c', '3']: position = 2
-        elif position in ['d', '4']: position = 3
-        elif position == 'c': continue
-        else:
-            log('Invalid option, retry!')
-            continue
-        g.apply_move(token, position)
-        break
-    print g
 
 def play_card_phase(g):
     playable = [str(x) for x in g.get_playable()]
@@ -121,7 +81,7 @@ def play_card_phase(g):
 def discard_phase(g):
     log("Discard phase")
     while True:
-        log("Select card to discard (1, 2, 3, 4, 5)")
+        log("Select card to discard (1, 2, 3, 4, 5, 6)")
         card = raw_input('Option:')
         try:
             card = int(card)

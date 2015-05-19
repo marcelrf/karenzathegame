@@ -58,7 +58,7 @@ class Player(object):
         if index > len(self.hand):
             raise Exception('Bad index')
         card = self.hand.card_at(index)
-        if self.board.distance_to(card) != 0:
+        if not self.board.leads_to(card):
             raise Exception('Card not playable')
         self.hand.remove(index)
         self.played = card

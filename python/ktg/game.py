@@ -87,7 +87,7 @@ class Game(object):
         return (
             (threatened and card_at.type == card.DEFENSE or
             not threatened and card_at.type == card.ATTACK) and
-            current_player.board.distance_to(card_at) == 0
+            current_player.board.leads_to(card_at)
         )
 
     def play_card(self, index):
