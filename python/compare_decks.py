@@ -144,10 +144,10 @@ def main():
     print 'bouts won', ('%.1f' % (float(bouts_won) / ITERATIONS * 50)) + '%', 'with avg score', ('%.1f' % (float(bouts_won_score) / bouts_won))
     print 'bouts lost', ('%.1f' % (float(bouts_lost) / ITERATIONS * 50)) + '%', 'with avg score', ('%.1f' % (float(bouts_lost_score) / bouts_lost))
 
-    print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
-    print_used(home_deck, home_drawn, home_used)
-    print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
-    print_used(away_deck, away_drawn, away_used)
+    # print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
+    # print_used(home_deck, home_drawn, home_used)
+    # print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
+    # print_used(away_deck, away_drawn, away_used)
 
 
 def store_used_cards(bout, home_used, away_used):
