@@ -144,10 +144,10 @@ def main():
     print 'bouts won', ('%.1f' % (float(bouts_won) / ITERATIONS * 50)) + '%', 'with avg score', ('%.1f' % (float(bouts_won_score) / bouts_won))
     print 'bouts lost', ('%.1f' % (float(bouts_lost) / ITERATIONS * 50)) + '%', 'with avg score', ('%.1f' % (float(bouts_lost_score) / bouts_lost))
 
-    # print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
-    # print_used(home_deck, home_drawn, home_used)
-    # print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
-    # print_used(away_deck, away_drawn, away_used)
+    print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ most used by home'
+    print_used(home_deck, home_drawn, home_used)
+    print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ most used by away'
+    print_used(away_deck, away_drawn, away_used)
 
 
 def store_used_cards(bout, home_used, away_used):
@@ -162,7 +162,9 @@ def store_used_cards(bout, home_used, away_used):
 
 def get_deck_dict(file_name):
     deck_json = open(file_name).read()
-    return json.loads(deck_json)
+    deck = json.loads(deck_json)
+    deck = filter(lambda x: x['type'] in [1, 2], deck)
+    return deck
 
 
 def get_best_bout(player, opponent, turn, initial=False):
@@ -215,7 +217,8 @@ def get_best_bout(player, opponent, turn, initial=False):
 
 
 def print_used(deck, drawn, used):
-    card_strs = set([str(card) for card in deck.cards])
+    card_strs = list(set([str(card) for card in deck.cards]))
+    card_strs.sort(key=lambda x: -float(used[x]) / drawn[x])
     for card_str in card_strs:
         print '-----------------'
         print card_str

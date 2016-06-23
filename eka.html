@@ -1,0 +1,521 @@
+
+<style>
+.card {
+    width: 6.35cm;
+    height: 8.89cm;
+    border: 0.03cm solid black;
+    position: relative;
+}
+.type {
+    width: 1cm;
+    height: 1cm;
+    position: absolute;
+    left: 0.23cm;
+    top: 0.35cm;
+}
+.type.attack {
+    background-image: url('images/attack.png');
+}
+.type.defense {
+    background-image: url('images/defense.png');
+}
+.type.special {
+    background-image: url('images/special.png');
+}
+.power {
+    width: 1cm;
+    height: 1cm;
+    position: absolute;
+    left: 0.23cm;
+    top: 1.4cm;
+    font-family: Impact;
+    font-size: 0.5cm;
+    line-height: 1.1cm;
+    background-image: url('images/power.png');
+    opacity: 0.6;
+}
+.miniature {
+    width: 0.9cm;
+    height: 0.9cm;
+    position: absolute;
+    left: 0.33cm;
+    top: 2.6cm;
+}
+.miniature img {
+    width: 0.9cm;
+    height: 0.9cm;
+}
+.name {
+    -moz-transform: rotate(-90deg);  /* FF3.5+ */
+    -o-transform: rotate(-90deg);  /* Opera 10.5 */
+    -webkit-transform: rotate(-90deg);  /* Saf3.1+, Chrome */
+    width: 6.4cm;
+    height: 1cm;
+    font-family: Impact;
+    font-size: 0.6cm;
+    color: gray;
+    position: absolute;
+    left: -2.28cm;
+    top: 4.7cm;
+}
+.drawing {
+    height: 4.8cm;
+    width: 4.4cm;
+    border: 0.03cm solid lightgray;
+    position: absolute;
+    left: 1.47cm;
+    top: 0.35cm;
+}
+.drawing img {
+    display: none;
+    height: 3.8cm;
+    width: 4.6cm;
+}
+.requisite {
+    height: 4.2cm;
+    width: 4.4cm;
+    position: absolute;
+    left: 1.5cm;
+    top: 5.7cm;
+}
+.requisite img {
+    height: 2.7cm;
+    width: 4.4cm;
+    opacity: 0.5;
+}
+.trajectory,
+.min-trajectory {
+    background-repeat: no-repeat;
+    position: absolute;
+}
+.trajectory {
+    width: 5cm;
+    height: 5cm;
+    opacity: 0.7;
+}
+.min-trajectory {
+    width: 5cm;
+    height: 5cm;
+    opacity: 0.8;
+}
+.trajectory.s1-s2 {
+    background-image: url('images/short.png');
+    -moz-transform: scale3d(1.2, -0.7, 1);  /* FF3.5+ */
+    -o-transform: scale3d(1.2, -0.7, 1);  /* Opera 10.5 */
+    -webkit-transform: scale3d(1.2, -0.7, 1);  /* Saf3.1+, Chrome */
+    left: 0.4cm;
+    top: -1.6cm;
+}
+.trajectory.s1-s3 {
+    background-image: url('images/short.png');
+    -moz-transform: rotate(90deg) scale3d(0.7, 1, 1);  /* FF3.5+ */
+    -o-transform: rotate(90deg) scale3d(0.7, 1, 1);  /* Opera 10.5 */
+    -webkit-transform: rotate(90deg) scale3d(0.7, 1, 1);  /* Saf3.1+, Chrome */
+    left: -1.3cm;
+    top: -0.7cm;
+}
+.trajectory.s1-s4 {
+    background-image: url('images/long.png');
+    -moz-transform: scale3d(1.2, -0.7, 1);  /* FF3.5+ */
+    -o-transform: scale3d(1.2, -0.7, 1);  /* Opera 10.5 */
+    -webkit-transform: scale3d(1.2, -0.7, 1);  /* Saf3.1+, Chrome */
+    left: 0.5cm;
+    top: -1.6cm;
+}
+.trajectory.s2-s1 {
+    background-image: url('images/short.png');
+    -moz-transform: scale3d(-1.2, -0.7, 1);  /* FF3.5+ */
+    -o-transform: scale3d(-1.2, -0.7, 1);  /* Opera 10.5 */
+    -webkit-transform: scale3d(-1.2, -0.7, 1);  /* Saf3.1+, Chrome */
+    left: -1.0cm;
+    top: -1.6cm;
+}
+.trajectory.s2-s3 {
+    background-image: url('images/long.png');
+    -moz-transform: scale3d(-1.2, -0.7, 1);  /* FF3.5+ */
+    -o-transform: scale3d(-1.2, -0.7, 1);  /* Opera 10.5 */
+    -webkit-transform: scale3d(-1.2, -0.7, 1);  /* Saf3.1+, Chrome */
+    left: -1cm;
+    top: -1.6cm;
+}
+.trajectory.s2-s4 {
+    background-image: url('images/short.png');
+    -moz-transform: rotate(90deg) scale3d(0.7, -1, 1);  /* FF3.5+ */
+    -o-transform: rotate(90deg) scale3d(0.7, -1, 1);  /* Opera 10.5 */
+    -webkit-transform: rotate(90deg) scale3d(0.7, -1, 1);  /* Saf3.1+, Chrome */
+    left: 0.7cm;
+    top: -0.7cm;
+}
+.trajectory.s3-s1 {
+    background-image: url('images/short.png');
+    -moz-transform: rotate(90deg) scale3d(-0.7, 1, 1);  /* FF3.5+ */
+    -o-transform: rotate(90deg) scale3d(-0.7, 1, 1);  /* Opera 10.5 */
+    -webkit-transform: rotate(90deg) scale3d(-0.7, 1, 1);  /* Saf3.1+, Chrome */
+    left: -1.3cm;
+    top: -1.6cm;
+}
+.trajectory.s3-s2 {
+    background-image: url('images/long.png');
+    -moz-transform: scale3d(1.2, 0.7, 1);  /* FF3.5+ */
+    -o-transform: scale3d(1.2, 0.7, 1);  /* Opera 10.5 */
+    -webkit-transform: scale3d(1.2, 0.7, 1);  /* Saf3.1+, Chrome */
+    left: 0.4cm;
+    top: -0.7cm;
+}
+.trajectory.s3-s4 {
+    background-image: url('images/short.png');
+    -moz-transform: scale3d(1.2, 0.7, 1);  /* FF3.5+ */
+    -o-transform: scale3d(1.2, 0.7, 1);  /* Opera 10.5 */
+    -webkit-transform: scale3d(1.2, 0.7, 1);  /* Saf3.1+, Chrome */
+    left: 0.4cm;
+    top: -0.7cm;
+}
+.trajectory.s4-s1 {
+    background-image: url('images/long.png');
+    -moz-transform: scale3d(-1.2, 0.7, 1);  /* FF3.5+ */
+    -o-transform: scale3d(-1.2, 0.7, 1);  /* Opera 10.5 */
+    -webkit-transform: scale3d(-1.2, 0.7, 1);  /* Saf3.1+, Chrome */
+    left: -1cm;
+    top: -0.7cm;
+}
+.trajectory.s4-s2 {
+    background-image: url('images/short.png');
+    -moz-transform: rotate(90deg) scale3d(-0.7, -1, 1);  /* FF3.5+ */
+    -o-transform: rotate(90deg) scale3d(-0.7, -1, 1);  /* Opera 10.5 */
+    -webkit-transform: rotate(90deg) scale3d(-0.7, -1, 1);  /* Saf3.1+, Chrome */
+    left: 0.7cm;
+    top: -1.6cm;
+}
+.trajectory.s4-s3 {
+    background-image: url('images/short.png');
+    -moz-transform: scale3d(-1.2, 0.7, 1);  /* FF3.5+ */
+    -o-transform: scale3d(-1.2, 0.7, 1);  /* Opera 10.5 */
+    -webkit-transform: scale3d(-1.2, 0.7, 1);  /* Saf3.1+, Chrome */
+    left: -1cm;
+    top: -0.7cm;
+}
+.min-trajectory.s1-s2 {
+    background-image: url('images/short.png');
+    -moz-transform: scale3d(0.25, -0.25, 1);  /* FF3.5+ */
+    -o-transform: scale3d(0.25, -0.25, 1);  /* Opera 10.5 */
+    -webkit-transform: scale3d(0.25, -0.25, 1);  /* Saf3.1+, Chrome */
+    left: -1.93cm;
+    top: -2.19cm;
+}
+.min-trajectory.s1-s3 {
+    background-image: url('images/short.png');
+    -moz-transform: rotate(90deg) scale3d(0.25, 0.25, 1);  /* FF3.5+ */
+    -o-transform: rotate(90deg) scale3d(0.25, 0.25, 1);  /* Opera 10.5 */
+    -webkit-transform: rotate(90deg) scale3d(0.25, 0.25, 1);  /* Saf3.1+, Chrome */
+    left: -2.24cm;
+    top: -1.9cm;
+}
+.min-trajectory.s1-s4 {
+    background-image: url('images/long.png');
+    -moz-transform: scale3d(0.25, -0.25, 1);  /* FF3.5+ */
+    -o-transform: scale3d(0.25, -0.25, 1);  /* Opera 10.5 */
+    -webkit-transform: scale3d(0.25, -0.25, 1);  /* Saf3.1+, Chrome */
+    left: -2.0cm;
+    top: -2.3cm;
+}
+.min-trajectory.s2-s1 {
+    background-image: url('images/short.png');
+    -moz-transform: scale3d(-0.25, -0.25, 1);  /* FF3.5+ */
+    -o-transform: scale3d(-0.25, -0.25, 1);  /* Opera 10.5 */
+    -webkit-transform: scale3d(-0.25, -0.25, 1);  /* Saf3.1+, Chrome */
+    left: -2.15cm;
+    top: -2.19cm;
+}
+.min-trajectory.s2-s3 {
+    background-image: url('images/long.png');
+    -moz-transform: scale3d(-0.25, -0.25, 1);  /* FF3.5+ */
+    -o-transform: scale3d(-0.25, -0.25, 1);  /* Opera 10.5 */
+    -webkit-transform: scale3d(-0.25, -0.25, 1);  /* Saf3.1+, Chrome */
+    left: -2.2cm;
+    top: -2.2cm;
+}
+.min-trajectory.s2-s4 {
+    background-image: url('images/short.png');
+    -moz-transform: rotate(90deg) scale3d(0.25, -0.25, 1);  /* FF3.5+ */
+    -o-transform: rotate(90deg) scale3d(0.25, -0.25, 1);  /* Opera 10.5 */
+    -webkit-transform: rotate(90deg) scale3d(0.25, -0.25, 1);  /* Saf3.1+, Chrome */
+    left: -1.9cm;
+    top: -1.9cm;
+}
+.min-trajectory.s3-s1 {
+    background-image: url('images/short.png');
+    -moz-transform: rotate(90deg) scale3d(-0.25, 0.25, 1);  /* FF3.5+ */
+    -o-transform: rotate(90deg) scale3d(-0.25, 0.25, 1);  /* Opera 10.5 */
+    -webkit-transform: rotate(90deg) scale3d(-0.25, 0.25, 1);  /* Saf3.1+, Chrome */
+    left: -2.2cm;
+    top: -2.15cm;
+}
+.min-trajectory.s3-s2 {
+    background-image: url('images/long.png');
+    -moz-transform: scale3d(0.25, 0.25, 1);  /* FF3.5+ */
+    -o-transform: scale3d(0.25, 0.25, 1);  /* Opera 10.5 */
+    -webkit-transform: scale3d(0.25, 0.25, 1);  /* Saf3.1+, Chrome */
+    left: -1.95cm;
+    top: -1.85cm;
+}
+.min-trajectory.s3-s4 {
+    background-image: url('images/short.png');
+    -moz-transform: scale3d(0.25, 0.25, 1);  /* FF3.5+ */
+    -o-transform: scale3d(0.25, 0.25, 1);  /* Opera 10.5 */
+    -webkit-transform: scale3d(0.25, 0.25, 1);  /* Saf3.1+, Chrome */
+    left: -1.95cm;
+    top: -1.9cm;
+}
+.min-trajectory.s4-s1 {
+    background-image: url('images/long.png');
+    -moz-transform: scale3d(-0.25, 0.25, 1);  /* FF3.5+ */
+    -o-transform: scale3d(-0.25, 0.25, 1);  /* Opera 10.5 */
+    -webkit-transform: scale3d(-0.25, 0.25, 1);  /* Saf3.1+, Chrome */
+    left: -2.15cm;
+    top: -1.85cm;
+}
+.min-trajectory.s4-s2 {
+    background-image: url('images/short.png');
+    -moz-transform: rotate(90deg) scale3d(-0.25, -0.25, 1);  /* FF3.5+ */
+    -o-transform: rotate(90deg) scale3d(-0.25, -0.25, 1);  /* Opera 10.5 */
+    -webkit-transform: rotate(90deg) scale3d(-0.25, -0.25, 1);  /* Saf3.1+, Chrome */
+    left: -1.95cm;
+    top: -2.15cm;
+}
+.min-trajectory.s4-s3 {
+    background-image: url('images/short.png');
+    -moz-transform: scale3d(-0.25, 0.25, 1);  /* FF3.5+ */
+    -o-transform: scale3d(-0.25, 0.25, 1);  /* Opera 10.5 */
+    -webkit-transform: scale3d(-0.25, 0.25, 1);  /* Saf3.1+, Chrome */
+    left: -2.15cm;
+    top: -1.95cm;
+}
+.text {
+    height: 2.3cm;
+    width: 3.8cm;
+    border: 0.03cm solid lightgray;
+    position: absolute;
+    left: 1.47cm;
+    top: 5.5cm;
+    padding: 0.3cm;
+    font-size: 12px;
+}
+.separator {
+    height: 1.2cm;
+}
+</style>
+<table cellspacing="0" cellpadding="0"><tr><td>
+                <div class="card">
+                    <div class="type attack"></div>
+                    <div class="power">&nbsp;&nbsp;&nbsp;2</div>
+                    <div class="miniature">
+                        <img src="images/board.png" />
+                        <div class="min-trajectory s1-s2"></div>
+                    </div>
+                    <div class="name">Eka - Number One</div>
+                    <div class="drawing">
+                        <img src="images/eka.png" />
+                    </div>
+                    <div class="requisite">
+                        <img src="images/board.png" />
+                        <div class="trajectory s1-s2"></div>
+                    </div>
+                </div>
+            </td><td>
+                <div class="card">
+                    <div class="type attack"></div>
+                    <div class="power">&nbsp;&nbsp;&nbsp;2</div>
+                    <div class="miniature">
+                        <img src="images/board.png" />
+                        <div class="min-trajectory s1-s3"></div>
+                    </div>
+                    <div class="name">Eka - Number One</div>
+                    <div class="drawing">
+                        <img src="images/eka.png" />
+                    </div>
+                    <div class="requisite">
+                        <img src="images/board.png" />
+                        <div class="trajectory s1-s3"></div>
+                    </div>
+                </div>
+            </td><td>
+                <div class="card">
+                    <div class="type attack"></div>
+                    <div class="power">&nbsp;&nbsp;&nbsp;2</div>
+                    <div class="miniature">
+                        <img src="images/board.png" />
+                        <div class="min-trajectory s1-s4"></div>
+                    </div>
+                    <div class="name">Eka - Number One</div>
+                    <div class="drawing">
+                        <img src="images/eka.png" />
+                    </div>
+                    <div class="requisite">
+                        <img src="images/board.png" />
+                        <div class="trajectory s1-s4"></div>
+                    </div>
+                </div>
+            </td></tr><tr><td>
+                <div class="card">
+                    <div class="type attack"></div>
+                    <div class="power">&nbsp;&nbsp;&nbsp;2</div>
+                    <div class="miniature">
+                        <img src="images/board.png" />
+                        <div class="min-trajectory s2-s1"></div>
+                    </div>
+                    <div class="name">Eka - Number One</div>
+                    <div class="drawing">
+                        <img src="images/eka.png" />
+                    </div>
+                    <div class="requisite">
+                        <img src="images/board.png" />
+                        <div class="trajectory s2-s1"></div>
+                    </div>
+                </div>
+            </td><td>
+                <div class="card">
+                    <div class="type attack"></div>
+                    <div class="power">&nbsp;&nbsp;&nbsp;2</div>
+                    <div class="miniature">
+                        <img src="images/board.png" />
+                        <div class="min-trajectory s2-s3"></div>
+                    </div>
+                    <div class="name">Eka - Number One</div>
+                    <div class="drawing">
+                        <img src="images/eka.png" />
+                    </div>
+                    <div class="requisite">
+                        <img src="images/board.png" />
+                        <div class="trajectory s2-s3"></div>
+                    </div>
+                </div>
+            </td><td>
+                <div class="card">
+                    <div class="type defense"></div>
+                    <div class="power">&nbsp;&nbsp;&nbsp;1</div>
+                    <div class="miniature">
+                        <img src="images/board.png" />
+                        <div class="min-trajectory s2-s4"></div>
+                    </div>
+                    <div class="name">Eka - Inside Block</div>
+                    <div class="drawing">
+                        <img src="images/eka.png" />
+                    </div>
+                    <div class="requisite">
+                        <img src="images/board.png" />
+                        <div class="trajectory s2-s4"></div>
+                    </div>
+                </div>
+            </td></tr><tr><td>
+                <div class="card">
+                    <div class="type attack"></div>
+                    <div class="power">&nbsp;&nbsp;&nbsp;2</div>
+                    <div class="miniature">
+                        <img src="images/board.png" />
+                        <div class="min-trajectory s3-s1"></div>
+                    </div>
+                    <div class="name">Eka - Number One</div>
+                    <div class="drawing">
+                        <img src="images/eka.png" />
+                    </div>
+                    <div class="requisite">
+                        <img src="images/board.png" />
+                        <div class="trajectory s3-s1"></div>
+                    </div>
+                </div>
+            </td><td>
+                <div class="card">
+                    <div class="type attack"></div>
+                    <div class="power">&nbsp;&nbsp;&nbsp;2</div>
+                    <div class="miniature">
+                        <img src="images/board.png" />
+                        <div class="min-trajectory s3-s2"></div>
+                    </div>
+                    <div class="name">Eka - Number One</div>
+                    <div class="drawing">
+                        <img src="images/eka.png" />
+                    </div>
+                    <div class="requisite">
+                        <img src="images/board.png" />
+                        <div class="trajectory s3-s2"></div>
+                    </div>
+                </div>
+            </td><td>
+                <div class="card">
+                    <div class="type attack"></div>
+                    <div class="power">&nbsp;&nbsp;&nbsp;2</div>
+                    <div class="miniature">
+                        <img src="images/board.png" />
+                        <div class="min-trajectory s3-s4"></div>
+                    </div>
+                    <div class="name">Eka - Number One</div>
+                    <div class="drawing">
+                        <img src="images/eka.png" />
+                    </div>
+                    <div class="requisite">
+                        <img src="images/board.png" />
+                        <div class="trajectory s3-s4"></div>
+                    </div>
+                </div>
+            </td></tr></table><div class="separator"></div><table cellspacing="0" cellpadding="0"><tr><td>
+                <div class="card">
+                    <div class="type attack"></div>
+                    <div class="power">&nbsp;&nbsp;&nbsp;2</div>
+                    <div class="miniature">
+                        <img src="images/board.png" />
+                        <div class="min-trajectory s4-s1"></div>
+                    </div>
+                    <div class="name">Eka - Number One</div>
+                    <div class="drawing">
+                        <img src="images/eka.png" />
+                    </div>
+                    <div class="requisite">
+                        <img src="images/board.png" />
+                        <div class="trajectory s4-s1"></div>
+                    </div>
+                </div>
+            </td><td>
+                <div class="card">
+                    <div class="type attack"></div>
+                    <div class="power">&nbsp;&nbsp;&nbsp;2</div>
+                    <div class="miniature">
+                        <img src="images/board.png" />
+                        <div class="min-trajectory s4-s2"></div>
+                    </div>
+                    <div class="name">Eka - Number One</div>
+                    <div class="drawing">
+                        <img src="images/eka.png" />
+                    </div>
+                    <div class="requisite">
+                        <img src="images/board.png" />
+                        <div class="trajectory s4-s2"></div>
+                    </div>
+                </div>
+            </td><td>
+                <div class="card">
+                    <div class="type attack"></div>
+                    <div class="power">&nbsp;&nbsp;&nbsp;2</div>
+                    <div class="miniature">
+                        <img src="images/board.png" />
+                        <div class="min-trajectory s4-s3"></div>
+                    </div>
+                    <div class="name">Eka - Number One</div>
+                    <div class="drawing">
+                        <img src="images/eka.png" />
+                    </div>
+                    <div class="requisite">
+                        <img src="images/board.png" />
+                        <div class="trajectory s4-s3"></div>
+                    </div>
+                </div>
+            </td></tr><tr><td>
+                <div class="card">
+                    <div class="type special"></div>
+                    <div class="power">&nbsp;&nbsp;&nbsp;0</div>
+                    <div class="name">Eka - Flow</div>
+                    <div class="drawing">
+                        <img src="images/eka.png" />
+                    </div>
+                    <div class="text">Play this card whenever you want. Playing this card does not prevent you from playing a technique card in the same turn. Move the sword to the square of your choice.</div>
+                </div>
+            </td></table>
