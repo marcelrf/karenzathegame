@@ -149,9 +149,8 @@ STYLE = """
     top: 0.35cm;
 }
 .drawing img {
-    display: none;
-    height: 3.8cm;
-    width: 4.6cm;
+    height: 4.5cm;
+    width: 4.4cm;
 }
 .requisite {
     height: 4.2cm;

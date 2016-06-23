@@ -55,11 +55,11 @@
     "sword_origin": 2,
     "sword_destiny": 0
 }, {
-    "fighter": "Eka",
-    "name" : "Number One",
+    "fighter": "Wasabi",
+    "name" : "Sliding",
     "type": "attack",
     "power": 2,
-    "image": "eka.png",
+    "image": "wasabi.png",
     "sword_origin": 2,
     "sword_destiny": 1
 }, {
