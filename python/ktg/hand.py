@@ -1,49 +1,61 @@
 # coding: utf-8
 
-import copy
+from card import *
+from copy import copy
+
 
 class Hand(object):
 
-    def __init__(self, cards=None):
-        if cards is None: cards = []
-        self.cards = cards
+    def __init__(self):
+        self.cards = []
 
     def __copy__(self):
         other = Hand()
-        for card in self.cards:
-            card_copy = copy.copy(card)
-            other.cards.append(card_copy)
+        other.cards = [copy(c) for c in self.cards]
         return other
-
-    def __eq__(self, other):
-        return self.cards == other.cards
-
-    def __str__(self):
-        lines = []
-        if len(self.cards) > 0:
-            card_texts = map(lambda x: (str(x) if x.is_legal() else x.reverse_str()).split("\n"), self.cards)
-            while len(card_texts[0]) > 0:
-                line = ""
-                for i in range(len(card_texts)):
-                    line += card_texts[i].pop(0)
-                lines.append(line)
-        return "\n".join(lines)
 
     def __len__(self):
         return len(self.cards)
 
-    def card_at(self, index):
-        if index > len(self.cards):
-            raise Exception('Bad index')
-        return self.cards[index - 1]
-
     def add(self, card):
         self.cards.append(card)
 
-    def remove(self, index):
-        if index > len(self.cards):
-            raise Exception('Bad index')
-        del self.cards[index - 1]
+    def remove(self, card):
+        self.cards.remove(card)
 
-    def contains(self, card):
-        return card in self.cards
+    def techniques(self):
+        return [c for c in self.cards if c.card_type == CardType.TECHNIQUE]
+
+    def abilities(self):
+        return [c for c in self.cards if c.card_type == CardType.ABILITY]
+
+    def attacks(self):
+        return [
+            c for c in self.techniques()
+            if c.technique_type == TechniqueType.ATTACK
+        ]
+
+    def defenses(self):
+        return [
+            c for c in self.techniques()
+            if c.technique_type == TechniqueType.DEFENSE
+        ]
+
+    def equipments(self):
+        return [
+            c for c in self.abilities()
+            if c.ability_type == AbilityType.EQUIPMENT
+        ]
+
+    def replacements(self):
+        return [
+            c for c in self.abilities()
+            if c.ability_type == AbilityType.REPLACEMENT
+        ]
+
+    def __str__(self):
+        text = ""
+        zipped_lines = zip(*[str(c).split('\n') for c in self.cards])
+        for zipped_line in zipped_lines:
+            text += ' '.join(zipped_line) + '\n'
+        return text.strip()

@@ -1,71 +1,71 @@
 # coding: utf-8
 
-import deck
-import hand
-import card
-import board
-import copy
+from ktg.hand import Hand
+from copy import copy
+from enum import Enum
+import random
+
+
+class PlayerState(Enum):
+    INITIATIVE = 1
+    THREATENED = 2
+
 
 class Player(object):
 
-    def __init__(self, deck_json):
-        self.deck = deck.Deck(deck_json)
-        self.hand = hand.Hand([])
-        self.board = board.Board()
-        self.board.random()
-        self.played = None
+    def __init__(self, deck):
+        self.deck = deck
+        self.discards = []
+        self.hand = Hand()
+        self.sequence = []
+        self.last_move = None
         self.score = 0
+        self.touche = False
 
     def __copy__(self):
-        other = Player()
-        other.deck = copy.copy(self.deck)
-        other.hand = copy.copy(self.hand)
-        other.board = copy.copy(self.board)
-        other.played = self.played
+        other = Player(copy(self.deck))
+        other.discards = [copy(c) for c in self.discards]
+        other.hand = copy(self.hand)
+        other.sequence = [copy(c) for c in self.sequence]
+        other.last_move = copy(self.last_move)
         other.score = self.score
+        other.touche = self.touche
         return other
 
-    def __eq__(self, other):
-        return (
-            self.deck == other.deck and
-            self.hand == other.hand and
-            self.board == other.board and
-            self.played == other.played and
-            self.score == other.score
-        )
-
-    def __str__(self):
-        if self.played is not None:
-            played = str(self.played)
-        else:
-            played = card.Card().reverse_str()
-        text  = played + '\n'
-        text += str(self.board) + '\n'
-        text += str(self.hand) + '\n'
-        text += 'Cards in deck: ' + str(len(self.deck.cards)) + ', '
-        text += 'Score: ' + str(self.score)
-        return text
+    def can_draw(self):
+        return len(self.deck) > 0
 
     def draw(self):
-        if len(self.deck.cards) == 0:
-            raise Exception('No more cards left')
-        self.hand.add(self.deck.draw())
+        card = self.deck.draw()
+        self.hand.add(card)
 
-    def move(self, token, position):
-        setattr(self.board, token, position)
+    def should_discard(self):
+        return len(self.hand) > 7
 
-    def play(self, index):
-        if index > len(self.hand):
-            raise Exception('Bad index')
-        card = self.hand.card_at(index)
-        if not self.board.leads_to(card):
-            raise Exception('Card not playable')
-        self.hand.remove(index)
-        self.played = card
-        self.board.move_sword_as_in(card)
+    def discard(self, card):
+        self.hand.remove(card)
+        self.discards.append(card)
 
-    def discard(self, index):
-        if index > len(self.hand):
-            raise Exception('Bad index')
-        self.hand.remove(index)
-        self.played = None
+    def can_reguard(self):
+        return len(self.sequence) > 0
+
+    def reguard(self):
+        for move in self.sequence:
+            self.discards.extend(move.cards)
+        self.sequence = []
+
+    def in_sequence(self):
+        return len(self.sequence) > 0
+
+    def sequence_head(self):
+        if len(self.sequence) > 0:
+            return self.sequence[-1]
+        else: return None
+
+    def play(self, move):
+        for card in move.cards:
+            self.hand.remove(card)
+        self.sequence.append(move)
+
+    def __str__(self):
+        pass

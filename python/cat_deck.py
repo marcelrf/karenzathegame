@@ -1,7 +1,7 @@
 
-from ktg.deck import Deck
-import sys
-import json
+# Usage: python -B cat_deck.py decks.eka
 
-with open(sys.argv[1], 'r') as input_file:
-	print Deck(json.loads(input_file.read()))
+import importlib
+import sys
+
+print(importlib.import_module(sys.argv[1]).deck)

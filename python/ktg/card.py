@@ -1,162 +1,199 @@
 # coding: utf-8
 
-# card indexes
-# numbers for sword positions
-#   1     2
-#
-#   3     4
-S1, S2, S3, S4 = range(4)
+from enum import Enum
+from copy import copy
 
-# other enumerations
-NO_POWER = None
-NO_TYPE, ATTACK, DEFENSE, SPECIAL = [None, 'attack', 'defense', 'special']
-NO_SWORD, SWORD_ORIGIN, SWORD_DESTINY = range(3)
+
+class CardType(Enum):
+    TECHNIQUE = 1
+    ABILITY = 2
+
+
+class TechniqueType(Enum):
+    ATTACK = 1
+    DEFENSE = 2
+
+
+class TechniqueSubtype(Enum):
+    SLASH = 1
+    THRUST = 2
+    HIT = 3
+    DEFLECT = 4
+    ABSORB = 5
+    SHIELD = 6
+
+
+class AbilityType(Enum):
+    EQUIPMENT = 1
+    STANDALONE = 2
+
+
+class SwordPosition(Enum):
+    TOP_LEFT = 1
+    TOP_RIGHT = 2
+    BOTTOM_LEFT = 3
+    BOTTOM_RIGHT = 4
+
 
 class Card(object):
 
-    def __init__(self, json_object=None):
-        if json_object is None:
-            self.fighter = ''
-            self.name = ''
-            self.type = NO_TYPE
-            self.power = NO_POWER
-            self.image = ''
-            self.sword = [NO_SWORD for i in range(4)]
-            self.text = ''
-        else:
-            self.fighter = json_object['fighter']
-            self.name = json_object['name']
-            self.type = json_object['type']
-            self.power = json_object['power']
-            self.image = json_object['image']
-            self.sword = [NO_SWORD for i in range(4)]
-            self.sword_origin = json_object.get('sword_origin', NO_SWORD)
-            self.sword_destiny = json_object.get('sword_destiny', NO_SWORD)
-            self.text = json_object.get('text', None)
+    @classmethod
+    def new_technique(cls,
+        name,
+        type,
+        subtype,
+        trajectory_starts,
+        trajectory_ends,
+        power,
+        image=None,
+        text=None,
+        requirements=None,
+        effects=None
+    ):
+        if type not in TechniqueType:
+            raise Exception('Invalid technique type.')
+        if subtype not in TechniqueSubtype:
+            raise Exception('Invalid technique subtype.')
+        if len(set(trajectory_starts)) != len(trajectory_starts):
+            raise Exception('Trajectory starts has duplicates.')
+        if len(set(trajectory_ends)) != len(trajectory_ends):
+            raise Exception('Trajectory ends has duplicates.')
+        if set(trajectory_starts).intersection(set(trajectory_ends)):
+            raise Exception('Trajectory starts and ends intersect.')
+        if power < 1 or power > 9:
+            raise Exception('Power outside of range 1-9.')
+        return Card(
+            name,
+            CardType.TECHNIQUE,
+            type,
+            subtype,
+            None,
+            sorted(trajectory_starts),
+            sorted(trajectory_ends),
+            power,
+            image,
+            text,
+            requirements,
+            effects
+        )
+
+    @classmethod
+    def new_ability(cls,
+        name,
+        type,
+        image=None,
+        text=None,
+        requirements=None,
+        effects=None
+    ):
+        if type not in AbilityType:
+            raise Exception('Invalid ability type.')
+        return Card(
+            name,
+            CardType.ABILITY,
+            None,
+            None,
+            type,
+            None,
+            None,
+            None,
+            image,
+            text,
+            requirements,
+            effects
+        )
+
+    def __init__(self,
+        name,
+        card_type,
+        technique_type,
+        technique_subtype,
+        ability_type,
+        trajectory_starts,
+        trajectory_ends,
+        power,
+        image,
+        text,
+        requirements,
+        effects
+    ):
+        self.name = name
+        self.card_type = card_type
+        self.technique_type = technique_type
+        self.technique_subtype = technique_subtype
+        self.ability_type = ability_type
+        self.trajectory_starts = trajectory_starts
+        self.trajectory_ends = trajectory_ends
+        self.power = power
+        self.image = image
+        self.text = text
+        self.requirements = requirements or (lambda x: True)
+        self.effects = effects or {}
 
     def __copy__(self):
-        other = Card()
-        other.fighter = self.fighter
-        other.name = self.name
-        other.type = self.type
-        other.power = self.power
-        other.image = self.image
-        other.sword = list(self.sword)
-        other.text = self.text
-        return other
+        return Card(
+            self.name,
+            self.card_type,
+            self.technique_type,
+            self.technique_subtype,
+            self.ability_type,
+            copy(self.trajectory_starts),
+            copy(self.trajectory_ends),
+            self.power,
+            self.image,
+            self.text,
+            self.requirements,
+            self.effects
+        )
 
     def __eq__(self, other):
         return (
-            self.fighter == other.fighter and
             self.name == other.name and
-            self.type == other.type and
+            self.card_type == other.card_type and
+            self.technique_type == other.technique_type and
+            self.technique_subtype == other.technique_subtype and
+            self.ability_type == other.ability_type and
+            self.trajectory_starts == other.trajectory_starts and
+            self.trajectory_ends == other.trajectory_ends and
             self.power == other.power and
             self.image == other.image and
-            self.sword == other.sword and
-            self.text == other.text
+            self.text == other.text and
+            self.requirements == other.requirements and
+            self.effects == other.effects
         )
 
-    def is_equivalent(self, other):
-        return (
-            self.type == other.type and
-            self.power == other.power and
-            self.sword == other.sword and
-            self.text == other.text
-        )
+    def __mul__(self, factor):
+        return [copy(self) for i in range(factor)]
 
     def __str__(self):
         normalize = lambda s, l: s + ' ' * (l - len(s)) if len(s) < l else s[0:l]
-        types = {NO_TYPE: '', ATTACK: 'Attack', DEFENSE: 'Defense', SPECIAL: 'Special'}
-        powers = lambda p: str(p) if p is not None else ' '
         text  = '.-------------.\n'
-        text += '| ' + normalize(self.fighter, 11) + ' |\n'
-        text += '| ' + normalize(self.name, 11) + ' |\n'
-        text += '|-------------|\n'
-        text += '| ' + normalize(types[self.type], 7) + ' (' + powers(self.power) + ') |\n'
+        if self.card_type == CardType.TECHNIQUE:
+            type_symbol = 'A' if self.technique_type == TechniqueType.ATTACK else 'D'
+            text += '| ' + type_symbol + ' (' + normalize(str(self.power) + ')', 8) + ' |\n'
+        else:
+            text += '| S           |\n'
         text += '|             |\n'
-        if self.type == NO_TYPE:
-            for i in range(3):
-                text += '|             |\n'
-        elif self.type in [ATTACK, DEFENSE]:
-            swords = {SWORD_ORIGIN: 'o', SWORD_DESTINY: 'x', NO_SWORD: '·'}
-            text += '|   %s     %s   |\n' % (swords[self.sword[S1]], swords[self.sword[S2]])
+        if self.card_type == CardType.TECHNIQUE:
+            symbol = lambda p: 'o' if p in self.trajectory_starts else ('x' if p in self.trajectory_ends else '·')
+            text += '|   %s     %s   |\n' % (symbol(SwordPosition.TOP_LEFT), symbol(SwordPosition.TOP_RIGHT))
             text += '|             |\n'
-            text += '|   %s     %s   |\n' % (swords[self.sword[S3]], swords[self.sword[S4]])
-        elif self.type == SPECIAL:
+            text += '|   %s     %s   |\n' % (symbol(SwordPosition.BOTTOM_LEFT), symbol(SwordPosition.BOTTOM_RIGHT))
+        elif self.card_type == CardType.ABILITY:
             card_text = normalize(self.text, 33)
             text += '| %s |\n' % card_text[0:11]
             text += '| %s |\n' % card_text[11:22]
             text += '| %s |\n' % card_text[22:33]
         text += '|             |\n'
+        text += '|-------------|\n'
+        text += '| ' + normalize(self.name, 11) + ' |\n'
         text += '\'-------------\''
         return text
 
-    def reverse_str(self):
+    @classmethod
+    def reverse_str(cls):
         text  = '.-------------.\n'
-        for i in range(9):
+        for i in range(8):
             text += '|             |\n'
         text += '\'-------------\''
         return text
-
-    def to_json_object(self):
-        json_object = {
-            'fighter': self.fighter,
-            'name': self.name,
-            'type': self.type,
-            'power': self.power,
-            'image': self.image,
-        }
-        if self.type == 'special':
-            json_object['text'] = self.text
-        else:
-            json_object['sword_origin'] = self.sword_origin
-            json_object['sword_destiny'] = self.sword_destiny
-
-    @property
-    def sword_origin(self):
-        if SWORD_ORIGIN in self.sword:
-            return self.sword.index(SWORD_ORIGIN)
-        else: return None
-    @sword_origin.setter
-    def sword_origin(self, value):
-        del self.sword_origin
-        self.sword[value] = SWORD_ORIGIN
-    @sword_origin.deleter
-    def sword_origin(self):
-        for i in range(4):
-            if self.sword[i] == SWORD_ORIGIN:
-                self.sword[i] = NO_SWORD
-
-    @property
-    def sword_destiny(self):
-        if SWORD_DESTINY in self.sword:
-            return self.sword.index(SWORD_DESTINY)
-        else: return None
-    @sword_destiny.setter
-    def sword_destiny(self, value):
-        del self.sword_destiny
-        self.sword[value] = SWORD_DESTINY
-    @sword_destiny.deleter
-    def sword_destiny(self):
-        for i in range(4):
-            if self.sword[i] == SWORD_DESTINY:
-                self.sword[i] = NO_SWORD
-
-    def is_legal(self):
-        return (
-            self.type in range(1, 4) and
-            self.power in range(0 if self.type == SPECIAL else 1, 6) and
-            (
-                self.type == SPECIAL or
-                self.sword.count(SWORD_ORIGIN) == 1 and
-                self.sword.count(SWORD_DESTINY) == 1
-            )
-        )
-
-    def leads_to(self, other):
-        # assumes the cards are legal
-        return (
-            self.type in [ATTACK, DEFENSE] and
-            other.type in [ATTACK, DEFENSE] and
-            self.sword_destiny == other.sword_origin
-        )

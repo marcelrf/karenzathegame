@@ -1,109 +1,121 @@
 # coding: utf-8
 
-import player
-import card
+from enum import Enum
+from ktg.player import Player
+from ktg.card import CardType
+from ktg.move import Move, MoveType
+from copy import copy
 
-TURN_1, TURN_2, PRE_TURN_1, PRE_TURN_2 = range(4)
-CARDS_IN_HAND = 5
+
+class Turn(Enum):
+    PLAYER_1 = 1
+    PLAYER_2 = 2
+
 
 class Game(object):
 
-    def __init__(self, deck_json_1, deck_json_2):
-        self.player1 = player.Player(deck_json_1)
-        self.player2 = player.Player(deck_json_2)
-        for i in range(CARDS_IN_HAND):
-            self.player1.draw()
-            self.player2.draw()
-        self.turn = PRE_TURN_1
+    def __init__(self, player_1, player_2):
+        self.player_1 = player_1
+        self.player_2 = player_2
+        self.turn = Turn.PLAYER_1
+        self.last_move = None
 
-    def __str__(self):
-        text  = "############################## Player1:\n"
-        text += str(self.player1) + "\n"
-        text += "############################## Player2:\n"
-        text += str(self.player2) + "\n"
-        text += "##############################\n"
-        return text
-
-    def get_current_player(self):
-        if self.turn in [TURN_1, PRE_TURN_1]:
-            return self.player1
-        else:
-            return self.player2
-
-    def get_last_player(self):
-        if self.turn in [TURN_1, PRE_TURN_1]:
-            return self.player2
-        else:
-            return self.player1
-
-    def player_is_threatened(self):
-        last_player = self.get_last_player()
-        return (
-            last_player.played is not None and
-            last_player.played.type == card.ATTACK
+    def __copy__(self):
+        other = Game(
+            copy(self.player_1),
+            copy(self.player_2),
         )
+        other.turn = self.turn
+        other.last_move = copy(self.last_move)
+        return other
 
-    def has_ended(self):
-        return (
-            self.player1.score >= 10 or
-            self.player2.score >= 10 or
-            len(self.player1.deck) == 0
-        )
+    def current_player(self):
+        return self.player_1 if self.turn == Turn.PLAYER_1 else self.player_2
 
-    def is_pre_turn(self):
-        return self.turn in [PRE_TURN_1, PRE_TURN_2]
+    def other_player(self):
+        return self.player_2 if self.turn == Turn.PLAYER_1 else self.player_1
 
-    def turn_number(self):
-        if self.turn in [PRE_TURN_1, TURN_1]:
-            return 1
-        else:
-            return 2
+    def current_player_is_threatened(self):
+        return self.last_move is not None and self.last_move.is_attack()
 
-    def draw_card(self):
-        current_player = self.get_current_player()
-        current_player.draw()
+    def is_over(self):
+        return any([
+            (
+                player.touche or
+                player.score >= 10 or
+                not player.can_draw()
+            )
+            for player in [self.player_1, self.player_2]
+        ])
 
-    def change_turn(self):
-        if self.turn == PRE_TURN_1: self.turn = PRE_TURN_2
-        elif self.turn == PRE_TURN_2: self.turn = TURN_1
-        else: self.turn = TURN_2 if self.turn == TURN_1 else TURN_1
+    def winner(self):
+        if not self.is_over():
+            raise Exception("Game is not over yet.")
+        if self.player_2.touche or self.player_1.score > self.player_2.score:
+            return self.player_1
+        if self.player_1.touche or self.player_2.score > self.player_1.score:
+            return self.player_2
+        return None
 
-    def apply_move(self, token, position):
-        current_player = self.get_current_player()
-        current_player.move(token, position)
+    def get_valid_moves(self):
+        current = self.current_player()
+        techniques = current.hand.techniques()
+        equipments = current.hand.equipments()
+        replacements = current.hand.replacements()
+        valid_moves = []
 
-    def get_playable(self):
-        current_player = self.get_current_player()
-        playable = []
-        for index in range(len(current_player.hand)):
-            if self.is_playable(index):
-                playable.append(index)
-        return playable
+        # fixed-point algorithm to get all combinations of technique+equipment*
+        prev_move_set = []
+        next_move_set = techniques
+        while len(next_move_set) > len(prev_move_set):
+            prev_move_set = next_move_set
+            next_move_set = copy(prev_move_set)
+            for move in prev_move_set:
+                move_technique = move.technique()
+                move_equipments = move.equipments()
+                equipments_to_try = copy(equipments)
+                for e in move_equipments:
+                    equipments_to_try.remove(e)
+                for e in equipments_to_try:
+                    if e.can_equip(move_technique):
+                        next_move_set.append(Move(MoveType.PLAY, move_technique, move_equipments + [e]))
 
-    def is_playable(self, index):
-        current_player = self.get_current_player()
-        card_at = current_player.hand.card_at(index)
-        threatened = self.player_is_threatened()
-        return (
-            (threatened and card_at.type == card.DEFENSE or
-            not threatened and card_at.type == card.ATTACK) and
-            current_player.board.leads_to(card_at)
-        )
+        # check of all which ones can be played
+        for move in next_move_set:
+            move_technique = move.technique()
+            move_equipments = move.equipments()
+            for e in move_equipments:
+                move_technique = e.equip(move_technique)
+            if move_technique.can_be_played(self):
+                valid_moves.append(move)
 
-    def play_card(self, index):
-        current_player = self.get_current_player()
-        last_player = self.get_last_player()
-        current_player.play(index)
-        if (not self.player_is_threatened() or
-            current_player.played.power < last_player.played.power):
-            self.change_turn()
-        else:
-            last_player.played = None
+        # also add replacements
+        for r in replacements:
+            if r.can_be_played(self):
+                valid_moves.append(Move(MoveType.PLAY, r))
 
-    def discard_card(self, index):
-        current_player = self.get_current_player()
-        last_player = self.get_last_player()
-        current_player.discard(index)
-        if self.player_is_threatened():
-            last_player.score += last_player.played.power
-        self.change_turn()
+        return valid_moves
+
+    def can_be_played(self, compiled_technique):
+        current_player = self.current_player()
+        if self.current_player_is_threatened() and compiled_technique.technique_type != TechniqueType.DEFENSE:
+            return False
+        if not self.current_player_is_threatened() and compiled_technique.technique_type != TechniqueType.ATTACK:
+            return False
+        if current_player.in_sequence():
+            for start in compiled_technique.trajectory_starts:
+                if start in current_player.sequence.head.trajectory_ends():
+                    return True
+            return False
+        return True
+
+    def play(self, move):
+        current_player = self.current_player()
+        if move.move_type == MoveType.DRAW:
+            current_player.draw()
+        elif move.move_type == MoveType.REGUARD:
+            current_player.reguard()
+        else: # PLAY
+            current_player.play(move)
+            pass
+        self.last_move = move
