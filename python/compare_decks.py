@@ -71,15 +71,14 @@ def compare_decks(deck_1, deck_2):
 if __name__ == '__main__':
     deck_eka = importlib.import_module("decks.eka").deck
     deck_michi = importlib.import_module("decks.michi").deck
-    from ktg.hand import Hand
-    hand = Hand()
-    for i in range(7):
-        hand.add(deck_eka.draw())
-    print(hand)
-    hand = Hand()
-    for i in range(7):
-        hand.add(deck_michi.draw())
-    print(hand)
+    from ktg.player import Player
+    from ktg.game import Game
+    eka = Player(deck_eka)
+    michi = Player(deck_michi)
+    g = Game(eka, michi)
+    print(g.current_player().hand)
+    for move in g.get_valid_moves():
+        print(move)
 
 
     # deck_2 = importlib.import_module("decks.karenza").deck

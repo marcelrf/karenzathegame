@@ -47,10 +47,10 @@ class Hand(object):
             if c.ability_type == AbilityType.EQUIPMENT
         ]
 
-    def replacements(self):
+    def standalones(self):
         return [
             c for c in self.abilities()
-            if c.ability_type == AbilityType.REPLACEMENT
+            if c.ability_type == AbilityType.STANDALONE
         ]
 
     def __str__(self):

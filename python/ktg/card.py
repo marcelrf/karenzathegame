@@ -191,9 +191,11 @@ class Card(object):
         return text
 
     @classmethod
-    def reverse_str(cls):
+    def reverse_str(cls, name=''):
+        normalize = lambda s, l: s + ' ' * (l - len(s)) if len(s) < l else s[0:l]
         text  = '.-------------.\n'
-        for i in range(8):
+        text += '| %s |\n' % normalize(name, 11)
+        for i in range(7):
             text += '|             |\n'
         text += '\'-------------\''
         return text

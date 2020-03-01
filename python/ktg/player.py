@@ -32,12 +32,13 @@ class Player(object):
         other.touche = self.touche
         return other
 
-    def can_draw(self):
-        return len(self.deck) > 0
+    def can_draw(self, cards=1):
+        return len(self.deck) >= cards
 
-    def draw(self):
-        card = self.deck.draw()
-        self.hand.add(card)
+    def draw(self, cards=1):
+        for i in range(cards):
+            card = self.deck.draw()
+            self.hand.add(card)
 
     def should_discard(self):
         return len(self.hand) > 7

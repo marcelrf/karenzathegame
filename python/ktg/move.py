@@ -1,6 +1,8 @@
 # coding: utf-8
 
+from hand import Hand
 from enum import Enum
+from card import Card
 from copy import copy
 
 
@@ -14,33 +16,40 @@ class Move(object):
 
     def __init__(self,
         move_type,
-        technique=None,
-        equipments=[],
-        replacement=None
+        main_card=None,
+        equipments=[]
     ):
         self.move_type = move_type
-        self.technique = technique
+        self.main_card = main_card
         self.equipments = equipments
-        self.replacement = replacement
-        self.compiled_technique = self._compile_technique()
-
-    def _compile_technique(self):
-        if self.technique is not None:
-            compiled_technique = self.technique
-            for e in self.equipments:
-                compiled_technique = e.equip(move_technique)
-            return compiled_technique
-        else: return None
 
     def __copy__(self):
         return Move(
             self.move_type,
-            copy(self.technique),
-            [e for e in self.equipments],
-            copy(self.replacement)
+            copy(self.main_card),
+            [e for e in self.equipments]
         )
 
-    def is_attack(self):
-        if self.compiled_technique is not None:
-            return self.compiled_technique.technique_type == TechniqueType.ATTACK
-        else: return False
+    def __eq__(self, other):
+        other_equipments = copy(other.equipments)
+        if (self.move_type != other.move_type or
+            self.main_card != other.main_card or
+            len(self.equipments) != len(other_equipments)):
+            return False
+        for e in self.equipments:
+            if e not in other_equipments:
+                return False
+            other_equipments.remove(e)
+        return len(other_equipments) == 0
+
+    def __str__(self):
+        if self.move_type == MoveType.PLAY:
+            move_cards = Hand()
+            move_cards.add(self.main_card)
+            for e in self.equipments:
+                move_cards.add(e)
+            return str(move_cards)
+        elif self.move_type == MoveType.DRAW:
+            return Card.reverse_str('DRAW')
+        elif self.move_type == MoveType.REGUARD:
+            return Card.reverse_str('REGUARD')

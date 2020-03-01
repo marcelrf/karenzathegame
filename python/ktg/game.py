@@ -1,8 +1,8 @@
 # coding: utf-8
 
 from enum import Enum
-from ktg.player import Player
-from ktg.card import CardType
+from ktg.player import Player, PlayerState
+from ktg.card import CardType, TechniqueType
 from ktg.move import Move, MoveType
 from copy import copy
 
@@ -12,11 +12,15 @@ class Turn(Enum):
     PLAYER_2 = 2
 
 
+INITIAL_CARDS_IN_HAND = 7
+
 class Game(object):
 
     def __init__(self, player_1, player_2):
         self.player_1 = player_1
         self.player_2 = player_2
+        self.player_1.draw(INITIAL_CARDS_IN_HAND)
+        self.player_2.draw(INITIAL_CARDS_IN_HAND)
         self.turn = Turn.PLAYER_1
         self.last_move = None
 
@@ -35,8 +39,11 @@ class Game(object):
     def other_player(self):
         return self.player_2 if self.turn == Turn.PLAYER_1 else self.player_1
 
-    def current_player_is_threatened(self):
-        return self.last_move is not None and self.last_move.is_attack()
+    def current_player_state(self):
+        if self.last_move is not None and self.last_move.is_attack():
+            return PlayerState.THREATENED
+        else:
+            return PlayerState.INITIATIVE
 
     def is_over(self):
         return any([
@@ -61,52 +68,71 @@ class Game(object):
         current = self.current_player()
         techniques = current.hand.techniques()
         equipments = current.hand.equipments()
-        replacements = current.hand.replacements()
+        standalones = current.hand.standalones()
         valid_moves = []
 
         # fixed-point algorithm to get all combinations of technique+equipment*
-        prev_move_set = []
-        next_move_set = techniques
-        while len(next_move_set) > len(prev_move_set):
-            prev_move_set = next_move_set
-            next_move_set = copy(prev_move_set)
-            for move in prev_move_set:
-                move_technique = move.technique()
-                move_equipments = move.equipments()
+        move_set_1 = []
+        move_set_2 = []
+        for t in techniques:
+            new_move = Move(MoveType.PLAY, t)
+            if new_move not in move_set_2:
+                move_set_2.append(new_move)
+        while len(move_set_2) > 0:
+            move_set_3 = []
+            for move in move_set_2:
+                move_technique = move.main_card
+                move_equipments = move.equipments
                 equipments_to_try = copy(equipments)
                 for e in move_equipments:
                     equipments_to_try.remove(e)
                 for e in equipments_to_try:
-                    if e.can_equip(move_technique):
-                        next_move_set.append(Move(MoveType.PLAY, move_technique, move_equipments + [e]))
+                    if self.can_equip(move_technique, e):
+                        new_move = Move(MoveType.PLAY, move_technique, move_equipments + [e])
+                        if new_move not in move_set_3:
+                            move_set_3.append(new_move)
+            move_set_1 += move_set_2
+            move_set_2 = move_set_3
 
         # check of all which ones can be played
-        for move in next_move_set:
-            move_technique = move.technique()
-            move_equipments = move.equipments()
+        for move in move_set_1:
+            move_technique = move.main_card
+            move_equipments = move.equipments
             for e in move_equipments:
-                move_technique = e.equip(move_technique)
-            if move_technique.can_be_played(self):
+                move_technique = self.equip(move_technique, e)
+            if self.can_be_played(move_technique):
                 valid_moves.append(move)
 
-        # also add replacements
-        for r in replacements:
-            if r.can_be_played(self):
-                valid_moves.append(Move(MoveType.PLAY, r))
+        # also add standalones
+        for s in standalones:
+            if self.can_be_played(s):
+                valid_moves.append(Move(MoveType.PLAY, s))
 
         return valid_moves
 
-    def can_be_played(self, compiled_technique):
+    def can_equip(self, technique, equipment):
+        return equipment.requirements(technique)
+
+    def equip(self, technique, equipment):
+        equipped = copy(technique)
+        equipped.effects.update(equipment.effects)
+        # TODO: fix! update is overriding increments!
+        return equipped
+
+    def can_be_played(self, card):
         current_player = self.current_player()
-        if self.current_player_is_threatened() and compiled_technique.technique_type != TechniqueType.DEFENSE:
-            return False
-        if not self.current_player_is_threatened() and compiled_technique.technique_type != TechniqueType.ATTACK:
-            return False
-        if current_player.in_sequence():
-            for start in compiled_technique.trajectory_starts:
-                if start in current_player.sequence.head.trajectory_ends():
-                    return True
-            return False
+        if card.card_type == CardType.TECHNIQUE:
+            if self.current_player_state() == PlayerState.THREATENED and card.technique_type != TechniqueType.DEFENSE:
+                return False
+            if self.current_player_state() == PlayerState.INITIATIVE and card.technique_type != TechniqueType.ATTACK:
+                return False
+            if current_player.in_sequence():
+                for start in card.trajectory_starts:
+                    if start in current_player.sequence_head().trajectory_ends:
+                        return True
+                return False
+        elif card.card_type == CardType.ABILITY:
+            return card.requirements(self)
         return True
 
     def play(self, move):
