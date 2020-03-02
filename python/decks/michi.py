@@ -152,9 +152,9 @@ deck = Deck(
             text="Equip a technique card. When you play it, you have to discard 1 card at random. If you can not discard 1 card, you can not play 'Explode'. Increase the technique's power by 3.",
             requirements=lambda t: True,
             effects={
-                "discards_required": +1,
+                "discard_requirement": +1,
                 "strike_resolution": {
-                    "power_increase": +3
+                    "power_increment": +3
                 }
             }
         ) * 2

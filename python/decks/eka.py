@@ -114,7 +114,7 @@ deck = Deck(
             requirements=lambda t: t.technique_type == TechniqueType.DEFENSE,
             effects={
                 "strike_resolution": {
-                    "opponents_power_increase": -2
+                    "opponents_power_increment": -2
                 }
             }
         ) * 2,
@@ -125,7 +125,7 @@ deck = Deck(
             requirements=lambda t: True,
             effects={
                 "strike_resolution": {
-                    "power_increase": +1
+                    "power_increment": +1
                 }
             }
         ) * 2,
@@ -136,7 +136,7 @@ deck = Deck(
             requirements=lambda t: t.technique_type == TechniqueType.ATTACK,
             effects={
                 "strike_resolution": {
-                    "power_increase": +2
+                    "power_increment": +2
                 }
             }
         ) * 2,

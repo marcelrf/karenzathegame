@@ -75,7 +75,7 @@ if __name__ == '__main__':
     from ktg.game import Game
     eka = Player(deck_eka)
     michi = Player(deck_michi)
-    g = Game(eka, michi)
+    g = Game(michi, eka)
     print(g.current_player().hand)
     for move in g.get_valid_moves():
         print(move)

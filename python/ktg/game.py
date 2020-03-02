@@ -111,15 +111,46 @@ class Game(object):
         return valid_moves
 
     def can_equip(self, technique, equipment):
+        # TODO add cummulative/only_by_itself field to equipments and take it into account here!
         return equipment.requirements(technique)
 
     def equip(self, technique, equipment):
         equipped = copy(technique)
-        equipped.effects.update(equipment.effects)
-        # TODO: fix! update is overriding increments!
+        for field in [
+            ['strike_resolution','power_increment'],
+            ['strike_resolution','opponents_power_increment']]:
+            self.increment_field(equipped.effects, field,
+                self.get_field(equipment.effects, field))
+        for field in [
+            ['strike_resolution', 'nothing_happens'],
+            ['trajectory_requirement'],
+            ['discard_requirement']]:
+            self.set_field(equipped.effects, field,
+                self.get_field(equipment.effects, field))
         return equipped
 
+    def get_field(self, obj, field):
+        for f in field:
+            if f in obj: obj = obj[f]
+            else: return None
+        return obj
+
+    def set_field(self, obj, field, value):
+        if value is None: return
+        for f in field[0:-1]:
+            if f not in obj:
+                obj[f] = {}
+            obj = obj[f]
+        obj[field[-1]] = value
+
+    def increment_field(self, obj, field, value):
+        if value is None: return
+        init_value = self.get_field(obj, field)
+        incr_value = value if init_value is None else init_value + value
+        self.set_field(obj, field, incr_value)
+
     def can_be_played(self, card):
+        # TODO introduce abilities (card.effects) that alter can_be_played!
         current_player = self.current_player()
         if card.card_type == CardType.TECHNIQUE:
             if self.current_player_state() == PlayerState.THREATENED and card.technique_type != TechniqueType.DEFENSE:
