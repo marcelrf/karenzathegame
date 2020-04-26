@@ -17,11 +17,12 @@ INITIAL_CARDS_IN_HAND = 7
 
 class Game(object):
 
-    def __init__(self, player_1, player_2):
+    def __init__(self, player_1, player_2, draw_initial=True):
         self.player_1 = player_1
         self.player_2 = player_2
-        self.player_1.draw(INITIAL_CARDS_IN_HAND)
-        self.player_2.draw(INITIAL_CARDS_IN_HAND)
+        if draw_initial:
+            self.player_1.draw(INITIAL_CARDS_IN_HAND)
+            self.player_2.draw(INITIAL_CARDS_IN_HAND)
         self.turn = Turn.PLAYER_1
         self.last_action = None
         self.properties = {}
@@ -30,6 +31,7 @@ class Game(object):
         other = Game(
             copy(self.player_1),
             copy(self.player_2),
+            draw_initial=False
         )
         other.turn = self.turn
         other.last_action = copy(self.last_action)
@@ -125,7 +127,7 @@ class Game(object):
     def can_be_played(self, move):
         current_player = self.current_player()
         move.materialize(self)
-        if move.materialized.discard_requirement + 1 > len(current_player.hand):
+        if move.materialized.discard_requirement + len(move.cards()) > len(current_player.hand):
             return False
         if move.materialized.card_type == CardType.TECHNIQUE:
             if self.current_player_state() == PlayerState.THREATENED and move.materialized.technique_type != TechniqueType.DEFENSE:

@@ -8,78 +8,132 @@ import sys
 import random
 
 
-# LOWEST_SCORE = -999999999
-# MIN_MAX_DEPTH = 4
-# EN_GARDE_SCORE = 2
-# INITIATIVE_SCORE = 2
-# MIN_MAX_DRAW_SAMPLE = 3
-#
-#
-# def evaluate(game):
-#     current = game.current_player()
-#     current_score = (
-#         current.score +
-#         len(current.hand) +
-#         (0 if current.in_sequence() else EN_GARDE_SCORE) +
-#         (0 if game.current_player_state() == PlayerState.THREATENED else INITIATIVE_SCORE)
-#     )
-#     other = game.other_player()
-#     other_score = (
-#         other.score +
-#         len(other.hand) +
-#         (0 if other.in_sequence() else EN_GARDE_SCORE) +
-#         (0 if game.current_player_state() != PlayerState.THREATENED else INITIATIVE_SCORE)
-#     )
-#     max_score = float(9 + INITIAL_CARDS_IN_HAND + EN_GARDE_SCORE + INITIATIVE_SCORE)
-#     normalized_score = (current_score - other_score) / max_score
-#     return normalized_score
-#
-#
-# def prob_min_max(game, depth):
-#     return evaluate(game)
+LOWEST_SCORE = -999999999
+MIN_MAX_DEPTH = 4
+EN_GARDE_SCORE = 2
+INITIATIVE_SCORE = 2
+MIN_MAX_DRAW_SAMPLE = 3
+PROB_MIN_MAX_RESHUFFLES = 5
 
 
-MONTE_CARLO_ITERATIONS = 1000
-WINNING_SCORE = 1
-LOOSING_SCORE = -1
+def evaluate(game):
+    current = game.current_player()
+    current_score = (
+        current.score +
+        len(current.hand) +
+        (0 if current.in_sequence() else EN_GARDE_SCORE) +
+        (0 if game.current_player_state() == PlayerState.THREATENED else INITIATIVE_SCORE)
+    )
+    other = game.other_player()
+    other_score = (
+        other.score +
+        len(other.hand) +
+        (0 if other.in_sequence() else EN_GARDE_SCORE) +
+        (0 if game.current_player_state() == PlayerState.INITIATIVE else INITIATIVE_SCORE)
+    )
+    max_score = 9 + INITIAL_CARDS_IN_HAND + EN_GARDE_SCORE + INITIATIVE_SCORE
+    normalized_score = float(current_score - other_score) / max_score
+    #print('evaluate(%s) = %d, %d, %d, %d, %d, %d, %f' % (game.current_player().deck.character, current.score, len(current.hand), other.score, len(other.hand), current_score, other_score, normalized_score))
+    return normalized_score
 
 
-def get_action_score(game, player, iterations):
-    action_score = 0
-    for i in range(iterations):
-        game_copy = copy(game)
-        game_copy.current_player().reshuffle_hand()
-        winner = monte_carlo(game_copy)
-        if winner == player: action_score += WINNING_SCORE
-        elif winner is not None: action_score += LOOSING_SCORE
-    return action_score
-
-
-def monte_carlo(game):
+def prob_min_max(game, depth):
+    #print('=='*(3-depth) + 'prob_min_max(%s,%d)' % (game.current_player().deck.character, depth))
     if game.is_over():
+        #print('==game_is_over')
         winner = game.winner()
-        if winner == game.player_1:
-            return Turn.PLAYER_1
-        elif winner == game.player_2:
-            return Turn.PLAYER_2
-        else:
-            return None
-    else:
-        valid_moves = game.get_valid_moves()
-        valid_actions = [Action(ActionType.MOVE, move) for move in valid_moves]
-        if game.can_draw(valid_moves):
+        if winner == game.current_player():
+            return 1
+        elif winner == game.other_player():
+            return -1
+        else: return 0
+    if depth == 0:
+        return evaluate(game)
+    total_score = 0
+    total_action_count = 0
+    for reshuffle in range(PROB_MIN_MAX_RESHUFFLES):
+        gc = copy(game)
+        gc.current_player().reshuffle_hand()
+        valid_moves = gc.get_valid_moves()
+        valid_actions = [Action(ActionType.MOVE, m) for m in valid_moves]
+        if gc.can_draw(valid_moves):
             valid_actions.append(Action(ActionType.DRAW))
-        if game.can_reguard(valid_moves):
+        if gc.can_reguard(valid_moves):
             valid_actions.append(Action(ActionType.REGUARD))
         if len(valid_actions) == 0:
-            game.play(Action(ActionType.TOUCHE))
+            valid_actions = [Action(ActionType.TOUCHE)]
+        for action in valid_actions:
+            total_action_count += 1
+            #print('=='*(3-depth) + 'trying action: %s' % str(action))
+            if action.action_type == ActionType.DRAW:
+                draw_score = 0
+                for i in range(MIN_MAX_DRAW_SAMPLE):
+                    gc2 = copy(gc)
+                    gc2.play(action)
+                    if len(gc2.other_player().hand) > INITIAL_CARDS_IN_HAND:
+                        gc2.other_player().discard_random(1)
+                    draw_score += -min_max(gc2, depth - 1)
+                action_score = float(draw_score) / MIN_MAX_DRAW_SAMPLE
+            else:
+                gc3 = copy(gc)
+                current_turn = Turn.PLAYER_1 if gc3.current_player() == gc3.player_1 else Turn.PLAYER_2
+                gc3.play(action)
+                next_turn = Turn.PLAYER_1 if gc3.current_player() == gc3.player_1 else Turn.PLAYER_2
+                if next_turn == current_turn:
+                    action_score = prob_min_max(gc3, depth - 1)
+                else:
+                    action_score = -min_max(gc3, depth - 1)
+            total_score += action_score
+    normalized_score = total_score / float(total_action_count)
+    #print('=='*(3-depth) + 'prob_min_max(%s,%d) -----> %d' % (game.current_player().deck.character, depth, normalized_score))
+    return normalized_score
+
+
+def min_max(game, depth):
+    #print('**'*(3-depth) + 'min_max(%s,%d)' % (game.current_player().deck.character, depth))
+    if game.is_over():
+        #print('==game_is_over')
+        winner = game.winner()
+        if winner == game.current_player():
+            return 1
+        elif winner == game.other_player():
+            return -1
+        else: return 0
+    if depth == 0:
+        return evaluate(game)
+    valid_moves = game.get_valid_moves()
+    valid_actions = [Action(ActionType.MOVE, move) for move in valid_moves]
+    if game.can_draw(valid_moves):
+        valid_actions.append(Action(ActionType.DRAW))
+    if game.can_reguard(valid_moves):
+        valid_actions.append(Action(ActionType.REGUARD))
+    if len(valid_actions) == 0:
+        valid_actions = [Action(ActionType.TOUCHE)]
+    best_score = LOWEST_SCORE
+    for action in valid_actions:
+        #print('**'*(3-depth) + 'trying action: %s' % str(action))
+        if action.action_type == ActionType.DRAW:
+            draw_score = 0
+            for i in range(MIN_MAX_DRAW_SAMPLE):
+                gc = copy(game)
+                gc.play(action)
+                if len(gc.other_player().hand) > INITIAL_CARDS_IN_HAND:
+                    gc.other_player().discard_random(1)
+                draw_score += -prob_min_max(gc, depth - 1)
+            action_score = float(draw_score) / MIN_MAX_DRAW_SAMPLE
         else:
-            action = random.choice(valid_actions)
-            game.play(action)
-            if (action.action_type == ActionType.DRAW and
-                len(game.other_player().hand) > INITIAL_CARDS_IN_HAND):
-                game.other_player().discard_random(1)
-        return monte_carlo(game)
+            gc2 = copy(game)
+            current_turn = Turn.PLAYER_1 if gc2.current_player() == gc2.player_1 else Turn.PLAYER_2
+            gc2.play(action)
+            next_turn = Turn.PLAYER_1 if gc2.current_player() == gc2.player_1 else Turn.PLAYER_2
+            if next_turn == current_turn:
+                action_score = min_max(gc2, depth - 1)
+            else:
+                action_score = -prob_min_max(gc2, depth - 1)
+        if action_score > best_score:
+            best_score = action_score
+    #print('**'*(3-depth) + 'min_max(%s,%d) -------> %d' % (game.current_player().deck.character, depth, best_score))
+    return best_score
 
 
 if __name__ == '__main__':
@@ -114,77 +168,60 @@ if __name__ == '__main__':
             elif choice == 't': g.play(Action(ActionType.TOUCHE))
             else: g.play(Action(ActionType.MOVE, valid_moves[int(choice)]))
         elif player_types[g.turn] == "computer":
-            # # collect valid actions
-            # valid_actions = [Action(ActionType.MOVE, move) for move in valid_moves]
-            # if g.can_draw(valid_moves):
-            #     valid_actions.append(Action(ActionType.DRAW))
-            # if g.can_reguard(valid_moves):
-            #     valid_actions.append(Action(ActionType.REGUARD))
-            # if len(valid_actions) == 0:
-            #     valid_actions = [Action(ActionType.TOUCHE)]
-            # # find best action
-            # if len(valid_actions) == 1:
-            #     best_action = valid_actions[0]
-            # else:
-            #     best_action, best_score = None, LOWEST_SCORE
-            #     for action in valid_actions:
-            #         # treat draw actions probabilistically
-            #         if action.action_type == ActionType.DRAW:
-            #             draw_score = 0
-            #             for i in range(MIN_MAX_DRAW_SAMPLE):
-            #                 gc = copy(g)
-            #                 gc.play(action)
-            #                 if len(g.other_player().hand) > INITIAL_CARDS_IN_HAND:
-            #                     g.other_player().discard_random(1)
-            #                 draw_score += -prob_min_max(gc, MIN_MAX_DEPTH)
-            #             action_score = draw_score / MIN_MAX_DRAW_SAMPLE
-            #         else:
-            #             gc = copy(g)
-            #             gc.play(action)
-            #             action_score = -prob_min_max(gc, MIN_MAX_DEPTH)
-            #         print(str(action) + " " + str(action_score))
-            #         if action_score > best_score:
-            #             best_score = action_score
-            #             best_action = action
-            # print(g.current_player().deck.character + " " + str(best_action))
-            # g.play(best_action)
-            # # if necessary choose what to discard
-            # if len(g.other_player().hand) > INITIAL_CARDS_IN_HAND:
-            #     best_discard, best_score = None, LOWEST_SCORE
-            #     for card in g.other_player().hand.cards:
-            #         gc = copy(g)
-            #         gc.other_player().discard(card)
-            #         discard_score = -prob_min_max(gc, MIN_MAX_DEPTH)
-            #         print("Discard " + card.name + " " + str(discard_score))
-            #         if discard_score > best_score:
-            #             best_score = discard_score
-            #             best_discard = card
-            #     g.other_player().discard(best_discard)
 
-            # MONTE CARLO
+            # collect valid actions
             valid_actions = [Action(ActionType.MOVE, move) for move in valid_moves]
             if g.can_draw(valid_moves):
                 valid_actions.append(Action(ActionType.DRAW))
             if g.can_reguard(valid_moves):
                 valid_actions.append(Action(ActionType.REGUARD))
             if len(valid_actions) == 0:
-                g.play(Action(ActionType.TOUCHE))
+                valid_actions = [Action(ActionType.TOUCHE)]
+            # find best action
+            if len(valid_actions) == 1:
+                best_action = valid_actions[0]
             else:
-                best_action, best_score = None, -99999999999
+                best_action, best_score = None, LOWEST_SCORE
                 for action in valid_actions:
-                    gc = copy(g)
-                    player = Turn.PLAYER_1 if g.current_player() == g.player_1 else Turn.PLAYER_2
-                    gc.play(action)
-                    action_score = get_action_score(gc, player, MONTE_CARLO_ITERATIONS)
+                    # treat draw actions probabilistically
+                    if action.action_type == ActionType.DRAW:
+                        draw_score = 0
+                        for i in range(MIN_MAX_DRAW_SAMPLE):
+                            gc = copy(g)
+                            gc.play(action)
+                            #print('&&&&&&&&& try drawing: ' + str(action))
+                            if len(gc.other_player().hand) > INITIAL_CARDS_IN_HAND:
+                                gc.other_player().discard_random(1)
+                            draw_score += -prob_min_max(gc, MIN_MAX_DEPTH)
+                        action_score = float(draw_score) / MIN_MAX_DRAW_SAMPLE
+                    else:
+                        gc2 = copy(g)
+                        current_turn = Turn.PLAYER_1 if gc2.current_player() == gc2.player_1 else Turn.PLAYER_2
+                        #print('@@@@@@@@@@@@@@@@@@@@@@@ try action: ' + str(action))
+                        gc2.play(action)
+                        next_turn = Turn.PLAYER_1 if gc2.current_player() == gc2.player_1 else Turn.PLAYER_2
+                        if next_turn == current_turn:
+                            action_score = min_max(gc2, MIN_MAX_DEPTH)
+                        else:
+                            action_score = -prob_min_max(gc2, MIN_MAX_DEPTH)
                     print(str(action) + " " + str(action_score))
                     if action_score > best_score:
-                        best_action = action
                         best_score = action_score
-                g.play(best_action)
-                print(g.other_player().deck.character + " " + str(best_action))
-                if (best_action.action_type == ActionType.DRAW and
-                    len(g.other_player().hand) > INITIAL_CARDS_IN_HAND):
-                    g.other_player().discard_random(1)
+                        best_action = action
+            print(g.current_player().deck.character + " " + str(best_action))
+            g.play(best_action)
+            # if necessary choose what to discard
+            if len(g.other_player().hand) > INITIAL_CARDS_IN_HAND:
+                best_discard, best_score = None, LOWEST_SCORE
+                for card in g.other_player().hand.cards:
+                    gc3 = copy(g)
+                    gc3.other_player().discard(card)
+                    discard_score = -prob_min_max(gc3, MIN_MAX_DEPTH)
+                    print("Discard " + card.name + " " + str(discard_score))
+                    if discard_score > best_score:
+                        best_score = discard_score
+                        best_discard = card
+                g.other_player().discard(best_discard)
 
     if g.winner() is None: print("THE GAME IS A DRAW!")
     else: print("THE WINNER IS: %s!" % g.winner().deck.character)

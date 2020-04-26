@@ -136,7 +136,6 @@ class Player(object):
     def reshuffle_hand(self):
         hand_len = len(self.hand)
         for card in self.hand.cards:
-            self.hand.remove(card)
             self.deck.reshuffle([card])
-        for i in range(hand_len):
-            self.hand.add(self.deck.draw())
+        self.hand.cards = []
+        self.draw(hand_len)
