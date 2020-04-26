@@ -22,18 +22,26 @@ def equip_explode(technique):
     return technique_copy
 
 def materialize_technique_dodge(game):
+    if game.current_player().in_sequence():
+        trajectory_ends = game.current_player().sequence_head().materialized.trajectory_ends
+    else:
+        trajectory_ends = []
     return Card.new_technique(
         name="Dodge",
         type=TechniqueType.DEFENSE,
         subtype=TechniqueSubtype.OTHER,
         trajectory_starts=[],
-        trajectory_ends=[],
+        trajectory_ends=trajectory_ends,
         power=0,
         can_be_chained=lambda t: True,
         strike_resolution={"nothing_happens": True}
     )
 
 def materialize_technique_blade_push(game):
+    if game.current_player().in_sequence():
+        trajectory_ends = game.current_player().sequence_head().materialized.trajectory_ends
+    else:
+        trajectory_ends = []
     can_be_played = (
         game.current_player().in_sequence() and
         game.current_player().sequence_head().main_card.technique_type == TechniqueType.ATTACK
@@ -46,7 +54,7 @@ def materialize_technique_blade_push(game):
         type=TechniqueType.ATTACK if can_be_played else TechniqueType.NEUTRAL,
         subtype=TechniqueSubtype.OTHER,
         trajectory_starts=[],
-        trajectory_ends=[],
+        trajectory_ends=trajectory_ends,
         power=power,
         can_be_chained=lambda t: can_be_played,
     )

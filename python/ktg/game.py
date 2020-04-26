@@ -160,6 +160,7 @@ class Game(object):
             else: # regular technique or standalone
                 action.move.materialize(self)
                 current_player.play(action.move)
+                action.move.materialized.apply_effects(self)
                 # discard if required
                 if action.move.materialized.discard_requirement > 0:
                     current_player.discard_random(action.move.materialized.discard_requirement)
@@ -207,6 +208,8 @@ class Game(object):
         if "nothing_happens" in defense.strike_resolution:
             self.turn = Turn.PLAYER_1 if self.turn == Turn.PLAYER_2 else Turn.PLAYER_2
             return
+        if "extra_score" in defense.strike_resolution:
+            self.current_player().score += defense.strike_resolution["extra_score"]
         # prevent power < 1
         if attack.power < 1: attack.power = 1
         if defense.power < 1: defense.power = 1

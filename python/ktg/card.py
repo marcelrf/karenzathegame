@@ -52,7 +52,6 @@ class Card(object):
         text=None,
         can_be_chained=None,
         strike_resolution=None,
-        can_be_played=None,
         apply_effects=None
     ):
         if type not in TechniqueType:
@@ -85,7 +84,7 @@ class Card(object):
             None,
             None,
             None,
-            None
+            apply_effects
         )
 
     @classmethod

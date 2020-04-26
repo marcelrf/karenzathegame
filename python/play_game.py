@@ -9,11 +9,12 @@ import random
 
 
 LOWEST_SCORE = -999999999
-MIN_MAX_DEPTH = 4
+MIN_MAX_DEPTH = 3
+DISCARD_MIN_MAX_DEPTH = 1
 EN_GARDE_SCORE = 2
 INITIATIVE_SCORE = 2
 MIN_MAX_DRAW_SAMPLE = 3
-PROB_MIN_MAX_RESHUFFLES = 5
+PROB_MIN_MAX_RESHUFFLES = 3
 
 
 def evaluate(game):
@@ -136,17 +137,10 @@ def min_max(game, depth):
     return best_score
 
 
-if __name__ == '__main__':
-    player_1_deck = importlib.import_module("decks." + sys.argv[1]).deck
-    player_2_deck = importlib.import_module("decks." + sys.argv[3]).deck
-    player_1 = Player(player_1_deck)
-    player_2 = Player(player_2_deck)
+def play_game(player_1, player_2, player_types):
     g = Game(player_1, player_2)
-    player_types = {}
-    player_types[Turn.PLAYER_1] = sys.argv[2]
-    player_types[Turn.PLAYER_2] = sys.argv[4]
     while not g.is_over():
-        print(g)
+        # print(g)
         valid_moves = g.get_valid_moves()
         if player_types[g.turn] == "human":
             index = 0
@@ -163,12 +157,12 @@ if __name__ == '__main__':
                 g.play(Action(ActionType.DRAW))
                 if len(g.other_player().hand) > INITIAL_CARDS_IN_HAND:
                     choice = raw_input("Discard: ")
-                    g.other_player().discard_at(index)
+                    g.other_player().discard_at(int(choice))
             elif choice == 'r': g.play(Action(ActionType.REGUARD))
             elif choice == 't': g.play(Action(ActionType.TOUCHE))
             else: g.play(Action(ActionType.MOVE, valid_moves[int(choice)]))
-        elif player_types[g.turn] == "computer":
 
+        elif player_types[g.turn] == "computer":
             # collect valid actions
             valid_actions = [Action(ActionType.MOVE, move) for move in valid_moves]
             if g.can_draw(valid_moves):
@@ -189,26 +183,24 @@ if __name__ == '__main__':
                         for i in range(MIN_MAX_DRAW_SAMPLE):
                             gc = copy(g)
                             gc.play(action)
-                            #print('&&&&&&&&& try drawing: ' + str(action))
                             if len(gc.other_player().hand) > INITIAL_CARDS_IN_HAND:
                                 gc.other_player().discard_random(1)
-                            draw_score += -prob_min_max(gc, MIN_MAX_DEPTH)
+                            draw_score += -prob_min_max(gc, DISCARD_MIN_MAX_DEPTH)
                         action_score = float(draw_score) / MIN_MAX_DRAW_SAMPLE
                     else:
                         gc2 = copy(g)
                         current_turn = Turn.PLAYER_1 if gc2.current_player() == gc2.player_1 else Turn.PLAYER_2
-                        #print('@@@@@@@@@@@@@@@@@@@@@@@ try action: ' + str(action))
                         gc2.play(action)
                         next_turn = Turn.PLAYER_1 if gc2.current_player() == gc2.player_1 else Turn.PLAYER_2
                         if next_turn == current_turn:
                             action_score = min_max(gc2, MIN_MAX_DEPTH)
                         else:
                             action_score = -prob_min_max(gc2, MIN_MAX_DEPTH)
-                    print(str(action) + " " + str(action_score))
+                    # print(str(action) + " " + str(action_score))
                     if action_score > best_score:
                         best_score = action_score
                         best_action = action
-            print(g.current_player().deck.character + " " + str(best_action))
+            # print(g.current_player().deck.character + " " + str(best_action))
             g.play(best_action)
             # if necessary choose what to discard
             if len(g.other_player().hand) > INITIAL_CARDS_IN_HAND:
@@ -216,8 +208,8 @@ if __name__ == '__main__':
                 for card in g.other_player().hand.cards:
                     gc3 = copy(g)
                     gc3.other_player().discard(card)
-                    discard_score = -prob_min_max(gc3, MIN_MAX_DEPTH)
-                    print("Discard " + card.name + " " + str(discard_score))
+                    discard_score = -prob_min_max(gc3, DISCARD_MIN_MAX_DEPTH)
+                    # print("Discard " + card.name + " " + str(discard_score))
                     if discard_score > best_score:
                         best_score = discard_score
                         best_discard = card
@@ -225,3 +217,16 @@ if __name__ == '__main__':
 
     if g.winner() is None: print("THE GAME IS A DRAW!")
     else: print("THE WINNER IS: %s!" % g.winner().deck.character)
+
+
+if __name__ == '__main__':
+    player_1_deck = importlib.import_module("decks." + sys.argv[1]).deck
+    player_2_deck = importlib.import_module("decks." + sys.argv[3]).deck
+    player_1 = Player(player_1_deck)
+    player_2 = Player(player_2_deck)
+    player_types = {}
+    player_types[Turn.PLAYER_1] = sys.argv[2]
+    player_types[Turn.PLAYER_2] = sys.argv[4]
+    for i in range(100):
+        play_game(copy(player_1), copy(player_2), player_types)
+        play_game(copy(player_2), copy(player_1), player_types)

@@ -13,13 +13,15 @@ def equip_zone_out(technique):
     if "opponents_power_increment" not in technique_copy.strike_resolution:
         technique_copy.strike_resolution["opponents_power_increment"] = 0
     technique_copy.strike_resolution["opponents_power_increment"] += -2
+    previous_effects = technique_copy.apply_effects
+    technique_copy.apply_effects = lambda g: previous_effects(g) or g.current_player().draw()
     return technique_copy
 
 def equip_flick_of_the_wrist(technique):
     technique_copy = copy(technique)
-    if "power_increment" not in technique_copy.strike_resolution:
-        technique_copy.strike_resolution["power_increment"] = 0
-    technique_copy.strike_resolution["power_increment"] += 1
+    if "extra_score" not in technique_copy.strike_resolution:
+        technique_copy.strike_resolution["extra_score"] = 0
+    technique_copy.strike_resolution["extra_score"] += 2
     return technique_copy
 
 def equip_torque(technique):
@@ -27,6 +29,8 @@ def equip_torque(technique):
     if "power_increment" not in technique_copy.strike_resolution:
         technique_copy.strike_resolution["power_increment"] = 0
     technique_copy.strike_resolution["power_increment"] += 2
+    previous_effects = technique_copy.apply_effects
+    technique_copy.apply_effects = lambda g: previous_effects(g) or g.current_player().draw()
     return technique_copy
 
 def apply_effects_invite(game):
@@ -135,21 +139,21 @@ deck = Deck(
         Card.new_ability(
             name="Zone out",
             type=AbilityType.EQUIPMENT,
-            text="Equip a defense card. Increase its power by 2.",
+            text="Equip a defense card. Increase its power by 2. Draw a card.",
             can_equip=lambda t: t.technique_type == TechniqueType.DEFENSE,
             equip=equip_zone_out
         ) * 2,
         Card.new_ability(
             name="Flick of the wrist",
             type=AbilityType.EQUIPMENT,
-            text="Equip a technique card. Increase its power by 1.",
-            can_equip=lambda t: True,
+            text="Equip a defense card. At strike resolution, regardless of its outcome, score 2 points.",
+            can_equip=lambda t: t.technique_type == TechniqueType.DEFENSE,
             equip=equip_flick_of_the_wrist
         ) * 2,
         Card.new_ability(
             name="Torque",
             type=AbilityType.EQUIPMENT,
-            text="Equip an attack card. Increase its power by 2.",
+            text="Equip an attack card. Increase its power by 2. Draw a card.",
             can_equip=lambda t: t.technique_type == TechniqueType.ATTACK,
             equip=equip_torque
         ) * 2,
