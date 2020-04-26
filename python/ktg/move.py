@@ -1,55 +1,64 @@
 # coding: utf-8
 
 from hand import Hand
-from enum import Enum
-from card import Card
 from copy import copy
-
-
-class MoveType(Enum):
-    PLAY = 1
-    DRAW = 2
-    REGUARD = 3
+from card import CardType
 
 
 class Move(object):
 
     def __init__(self,
-        move_type,
-        main_card=None,
-        equipments=[]
+        main_card,
+        equipments=[],
+        materialized=None
     ):
-        self.move_type = move_type
         self.main_card = main_card
         self.equipments = equipments
+        self.materialized = materialized
 
     def __copy__(self):
         return Move(
-            self.move_type,
             copy(self.main_card),
-            [e for e in self.equipments]
+            [e for e in self.equipments],
+            copy(self.materialized)
         )
 
     def __eq__(self, other):
-        other_equipments = copy(other.equipments)
-        if (self.move_type != other.move_type or
-            self.main_card != other.main_card or
-            len(self.equipments) != len(other_equipments)):
+        if (self.main_card != other.main_card or
+            self.materialized != other.materialized):
             return False
+        other_equipments = copy(other.equipments)
         for e in self.equipments:
             if e not in other_equipments:
                 return False
             other_equipments.remove(e)
         return len(other_equipments) == 0
 
+    def __len__(self):
+        return 1 + len(self.equipments)
+
     def __str__(self):
-        if self.move_type == MoveType.PLAY:
-            move_cards = Hand()
-            move_cards.add(self.main_card)
-            for e in self.equipments:
-                move_cards.add(e)
-            return str(move_cards)
-        elif self.move_type == MoveType.DRAW:
-            return Card.reverse_str('DRAW')
-        elif self.move_type == MoveType.REGUARD:
-            return Card.reverse_str('REGUARD')
+        move_cards = Hand()
+        move_cards.add(self.main_card)
+        for e in self.equipments:
+            move_cards.add(e)
+        return str(move_cards)
+
+    def name(self):
+        return ' + '.join([c.name for c in self.cards()])
+
+    def add_equipment(self, equipment):
+        self.equipments.append(equipment)
+        self.materialized = None
+
+    def cards(self):
+        return [self.main_card] + self.equipments
+
+    def materialize(self, game):
+        if self.main_card.card_type == CardType.ABILITY:
+            self.materialized = self.main_card.materialize_technique(game)
+        else:
+            equipped_technique = copy(self.main_card)
+            for equipment in self.equipments:
+                equipped_technique = equipment.equip(equipped_technique)
+            self.materialized = equipped_technique

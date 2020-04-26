@@ -53,6 +53,12 @@ class Hand(object):
             if c.ability_type == AbilityType.STANDALONE
         ]
 
+    def instants(self):
+        return [
+            c for c in self.abilities()
+            if c.ability_type == AbilityType.INSTANT
+        ]
+
     def __str__(self):
         text = ""
         zipped_lines = zip(*[str(c).split('\n') for c in self.cards])

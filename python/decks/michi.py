@@ -8,8 +8,52 @@ from itertools import chain
 from copy import copy
 
 
+def equip_flow(technique):
+    technique_copy = copy(technique)
+    technique_copy.can_be_chained = lambda g: True
+    return technique_copy
+
+def equip_explode(technique):
+    technique_copy = copy(technique)
+    if "power_increment" not in technique_copy.strike_resolution:
+        technique_copy.strike_resolution["power_increment"] = 0
+    technique_copy.strike_resolution["power_increment"] += 3
+    technique_copy.discard_requirement += 1
+    return technique_copy
+
+def materialize_technique_dodge(game):
+    return Card.new_technique(
+        name="Dodge",
+        type=TechniqueType.DEFENSE,
+        subtype=TechniqueSubtype.OTHER,
+        trajectory_starts=[],
+        trajectory_ends=[],
+        power=0,
+        can_be_chained=lambda t: True,
+        strike_resolution={"nothing_happens": True}
+    )
+
+def materialize_technique_blade_push(game):
+    can_be_played = (
+        game.current_player().in_sequence() and
+        game.current_player().sequence_head().main_card.technique_type == TechniqueType.ATTACK
+    )
+    if can_be_played:
+        power = game.current_player().sequence_head().main_card.power / 2
+    else: power = 0
+    return Card.new_technique(
+        name="Blade push",
+        type=TechniqueType.ATTACK if can_be_played else TechniqueType.NEUTRAL,
+        subtype=TechniqueSubtype.OTHER,
+        trajectory_starts=[],
+        trajectory_ends=[],
+        power=power,
+        can_be_chained=lambda t: can_be_played,
+    )
+
+
 deck = Deck(
-    'Eka',
+    'Michi',
     list(chain(
         Card.new_technique(
             name="Quick blow",
@@ -111,52 +155,27 @@ deck = Deck(
             name="Flow",
             type=AbilityType.EQUIPMENT,
             text="Equip any technique card. That card can be played regardless of any trajectory requirement.",
-            requirements=lambda t: True,
-            effects={
-                "trajectory_requirement": lambda t: True
-            }
-        ) * 2,
-        Card.new_ability(
-            name="Dodge",
-            type=AbilityType.STANDALONE,
-            text="Play it like defense card (regardless of trajectory). Your opponent's attack has no effect and your opponent plays next turn.",
-            requirements=lambda g: g.current_player_state() == PlayerState.THREATENED,
-            effects={
-                "strike_resolution": {
-                    "nothing_happens": True
-                }
-            }
-        ) * 2,
-        Card.new_ability(
-            name="Blade push",
-            type=AbilityType.STANDALONE,
-            text="You can play this card if the most recent technique in your sequence is an attack. This card becomes a copy of that attack, but its power is reduced by half (rounding down). You can play it regardless of the trajectory requirement.",
-            requirements=lambda g: (
-                g.current_player().sequence_head() is not None and
-                g.current_player().sequence_head().main_card.card_type == CardType.TECHNIQUE and
-                g.current_player().sequence_head().main_card.technique_type == TechniqueType.ATTACK
-            ),
-            effects={
-                "materialize_technique": {
-                    "technique_type": lambda g: TechniqueType.ATTACK,
-                    "technique_subtype": lambda g: TechniqueSubype.HIT,
-                    "trajectory_starts": lambda g: g.current_player().sequence_head().main_card.trajectory_ends,
-                    "trajectory_ends": lambda g: g.current_player().sequence_head().main_card.trajectory_ends,
-                    "power": lambda g: g.current_player().sequence_head().main_card.power / 2
-                }
-            }
+            can_equip=lambda t: True,
+            equip=equip_flow
         ) * 2,
         Card.new_ability(
             name="Explode",
             type=AbilityType.EQUIPMENT,
             text="Equip a technique card. When you play it, you have to discard 1 card at random. If you can not discard 1 card, you can not play 'Explode'. Increase the technique's power by 3.",
-            requirements=lambda t: True,
-            effects={
-                "discard_requirement": +1,
-                "strike_resolution": {
-                    "power_increment": +3
-                }
-            }
+            can_equip=lambda t: True,
+            equip=equip_explode
+        ) * 2,
+        Card.new_ability(
+            name="Dodge",
+            type=AbilityType.STANDALONE,
+            text="Play it like a defense card (regardless of trajectory). Your opponent's attack has no effect and your opponent plays next turn.",
+            materialize_technique=materialize_technique_dodge
+        ) * 2,
+        Card.new_ability(
+            name="Blade push",
+            type=AbilityType.STANDALONE,
+            text="You can play this card if you played an attack on your last turn. This card becomes a copy of that attack, but its power is reduced by half (rounding down).",
+            materialize_technique=materialize_technique_blade_push
         ) * 2
     ))
 )

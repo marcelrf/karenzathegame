@@ -12,6 +12,7 @@ class CardType(Enum):
 class TechniqueType(Enum):
     ATTACK = 1
     DEFENSE = 2
+    NEUTRAL = 3
 
 
 class TechniqueSubtype(Enum):
@@ -21,11 +22,13 @@ class TechniqueSubtype(Enum):
     DEFLECT = 4
     ABSORB = 5
     SHIELD = 6
+    OTHER = 7
 
 
 class AbilityType(Enum):
     EQUIPMENT = 1
     STANDALONE = 2
+    INSTANT = 3
 
 
 class SwordPosition(Enum):
@@ -47,12 +50,14 @@ class Card(object):
         power,
         image=None,
         text=None,
-        requirements=None,
-        effects=None
+        can_be_chained=None,
+        strike_resolution=None,
+        can_be_played=None,
+        apply_effects=None
     ):
         if type not in TechniqueType:
             raise Exception('Invalid technique type.')
-        if subtype not in TechniqueSubtype:
+        if subtype is not None and subtype not in TechniqueSubtype:
             raise Exception('Invalid technique subtype.')
         if len(set(trajectory_starts)) != len(trajectory_starts):
             raise Exception('Trajectory starts has duplicates.')
@@ -60,8 +65,8 @@ class Card(object):
             raise Exception('Trajectory ends has duplicates.')
         if set(trajectory_starts).intersection(set(trajectory_ends)):
             raise Exception('Trajectory starts and ends intersect.')
-        if power < 1 or power > 9:
-            raise Exception('Power outside of range 1-9.')
+        if power < 0 or power > 9:
+            raise Exception('Power outside of range 0-9.')
         return Card(
             name,
             CardType.TECHNIQUE,
@@ -73,8 +78,14 @@ class Card(object):
             power,
             image,
             text,
-            requirements,
-            effects
+            None,
+            None,
+            strike_resolution,
+            can_be_chained,
+            None,
+            None,
+            None,
+            None
         )
 
     @classmethod
@@ -83,8 +94,14 @@ class Card(object):
         type,
         image=None,
         text=None,
-        requirements=None,
-        effects=None
+        can_equip=None,
+        equip=None,
+        strike_resolution=None,
+        can_be_chained=None,
+        discard_requirement=None,
+        materialize_technique=None,
+        can_be_played=None,
+        apply_effects=None
     ):
         if type not in AbilityType:
             raise Exception('Invalid ability type.')
@@ -99,8 +116,14 @@ class Card(object):
             None,
             image,
             text,
-            requirements,
-            effects
+            can_equip,
+            equip,
+            strike_resolution,
+            can_be_chained,
+            discard_requirement,
+            materialize_technique,
+            can_be_played,
+            apply_effects
         )
 
     def __init__(self,
@@ -114,8 +137,14 @@ class Card(object):
         power,
         image,
         text,
-        requirements,
-        effects
+        can_equip,
+        equip,
+        strike_resolution,
+        can_be_chained,
+        discard_requirement,
+        materialize_technique,
+        can_be_played,
+        apply_effects
     ):
         self.name = name
         self.card_type = card_type
@@ -127,8 +156,14 @@ class Card(object):
         self.power = power
         self.image = image
         self.text = text
-        self.requirements = requirements or (lambda x: True)
-        self.effects = effects or {}
+        self.can_equip = can_equip or default_can_equip
+        self.equip = equip or default_equip
+        self.strike_resolution = strike_resolution or {}
+        self.can_be_chained = can_be_chained or self.default_can_be_chained
+        self.discard_requirement = discard_requirement or 0
+        self.materialize_technique = materialize_technique or (lambda g: None)
+        self.can_be_played = can_be_played or (lambda g: False)
+        self.apply_effects = apply_effects or (lambda g: None)
 
     def __copy__(self):
         return Card(
@@ -142,8 +177,14 @@ class Card(object):
             self.power,
             self.image,
             self.text,
-            self.requirements,
-            self.effects
+            self.can_equip,
+            self.equip,
+            copy(self.strike_resolution),
+            self.can_be_chained,
+            self.discard_requirement,
+            self.materialize_technique,
+            self.can_be_played,
+            self.apply_effects
         )
 
     def __eq__(self, other):
@@ -158,8 +199,14 @@ class Card(object):
             self.power == other.power and
             self.image == other.image and
             self.text == other.text and
-            self.requirements == other.requirements and
-            self.effects == other.effects
+            self.can_equip == other.can_equip and
+            self.equip == other.equip and
+            self.strike_resolution == other.strike_resolution and
+            self.can_be_chained == other.can_be_chained and
+            self.discard_requirement == other.discard_requirement and
+            self.materialize_technique == other.materialize_technique and
+            self.can_be_played == other.can_be_played and
+            self.apply_effects == other.apply_effects
         )
 
     def __mul__(self, factor):
@@ -199,3 +246,17 @@ class Card(object):
             text += '|             |\n'
         text += '\'-------------\''
         return text
+
+    def default_can_be_chained(self, technique):
+        if len(technique.trajectory_ends) == 0:
+            return True
+        for start in self.trajectory_starts:
+            if start in technique.trajectory_ends:
+                return True
+        return False
+
+def default_can_equip(technique):
+    return False
+
+def default_equip(technique):
+    return copy(technique)

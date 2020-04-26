@@ -2,8 +2,9 @@
 
 from enum import Enum
 from ktg.player import Player, PlayerState
-from ktg.card import CardType, TechniqueType
-from ktg.move import Move, MoveType
+from ktg.card import CardType, TechniqueType, AbilityType, Card
+from ktg.action import Action, ActionType
+from ktg.move import Move
 from copy import copy
 
 
@@ -11,8 +12,8 @@ class Turn(Enum):
     PLAYER_1 = 1
     PLAYER_2 = 2
 
-
 INITIAL_CARDS_IN_HAND = 7
+
 
 class Game(object):
 
@@ -22,7 +23,8 @@ class Game(object):
         self.player_1.draw(INITIAL_CARDS_IN_HAND)
         self.player_2.draw(INITIAL_CARDS_IN_HAND)
         self.turn = Turn.PLAYER_1
-        self.last_move = None
+        self.last_action = None
+        self.properties = {}
 
     def __copy__(self):
         other = Game(
@@ -30,8 +32,15 @@ class Game(object):
             copy(self.player_2),
         )
         other.turn = self.turn
-        other.last_move = copy(self.last_move)
+        other.last_action = copy(self.last_action)
+        other.properties = copy(self.properties)
         return other
+
+    def __str__(self):
+        player_1_text = self.player_1.top_str(self.current_player_state() if self.current_player() == self.player_1 else None)
+        separator = '+' * 172
+        player_2_text = self.player_2.bottom_str(self.current_player_state() if self.current_player() == self.player_2 else None)
+        return ''.join([player_1_text, separator, player_2_text])
 
     def current_player(self):
         return self.player_1 if self.turn == Turn.PLAYER_1 else self.player_2
@@ -40,7 +49,9 @@ class Game(object):
         return self.player_2 if self.turn == Turn.PLAYER_1 else self.player_1
 
     def current_player_state(self):
-        if self.last_move is not None and self.last_move.is_attack():
+        if (self.last_action is not None and self.last_action.action_type == ActionType.MOVE and
+            self.last_action.move.main_card.ability_type != AbilityType.INSTANT and
+            self.last_action.move.materialized.technique_type == TechniqueType.ATTACK):
             return PlayerState.THREATENED
         else:
             return PlayerState.INITIATIVE
@@ -58,9 +69,9 @@ class Game(object):
     def winner(self):
         if not self.is_over():
             raise Exception("Game is not over yet.")
-        if self.player_2.touche or self.player_1.score > self.player_2.score:
+        if self.player_2.touche or (not self.player_1.touche and self.player_1.score > self.player_2.score):
             return self.player_1
-        if self.player_1.touche or self.player_2.score > self.player_1.score:
+        if self.player_1.touche or (not self.player_2.touche and self.player_2.score > self.player_1.score):
             return self.player_2
         return None
 
@@ -69,26 +80,24 @@ class Game(object):
         techniques = current.hand.techniques()
         equipments = current.hand.equipments()
         standalones = current.hand.standalones()
+        instants = current.hand.instants()
         valid_moves = []
 
         # fixed-point algorithm to get all combinations of technique+equipment*
         move_set_1 = []
-        move_set_2 = []
-        for t in techniques:
-            new_move = Move(MoveType.PLAY, t)
-            if new_move not in move_set_2:
-                move_set_2.append(new_move)
+        move_set_2 = self.deduplicated([Move(t) for t in techniques])
         while len(move_set_2) > 0:
             move_set_3 = []
             for move in move_set_2:
                 move_technique = move.main_card
                 move_equipments = move.equipments
+                move.materialize(self)
                 equipments_to_try = copy(equipments)
                 for e in move_equipments:
                     equipments_to_try.remove(e)
                 for e in equipments_to_try:
-                    if self.can_equip(move_technique, e):
-                        new_move = Move(MoveType.PLAY, move_technique, move_equipments + [e])
+                    if e.can_equip(move.materialized):
+                        new_move = Move(move_technique, move_equipments + [e])
                         if new_move not in move_set_3:
                             move_set_3.append(new_move)
             move_set_1 += move_set_2
@@ -96,83 +105,124 @@ class Game(object):
 
         # check of all which ones can be played
         for move in move_set_1:
-            move_technique = move.main_card
-            move_equipments = move.equipments
-            for e in move_equipments:
-                move_technique = self.equip(move_technique, e)
-            if self.can_be_played(move_technique):
+            if self.can_be_played(move):
                 valid_moves.append(move)
 
         # also add standalones
         for s in standalones:
-            if self.can_be_played(s):
-                valid_moves.append(Move(MoveType.PLAY, s))
+            move = Move(s)
+            if self.can_be_played(move):
+                valid_moves.append(move)
 
-        return valid_moves
+        # also add instants
+        if "current_must_attack" not in self.properties:
+            for i in instants:
+                if i.can_be_played(self):
+                    valid_moves.append(Move(i))
 
-    def can_equip(self, technique, equipment):
-        # TODO add cummulative/only_by_itself field to equipments and take it into account here!
-        return equipment.requirements(technique)
+        return self.deduplicated(valid_moves)
 
-    def equip(self, technique, equipment):
-        equipped = copy(technique)
-        for field in [
-            ['strike_resolution','power_increment'],
-            ['strike_resolution','opponents_power_increment']]:
-            self.increment_field(equipped.effects, field,
-                self.get_field(equipment.effects, field))
-        for field in [
-            ['strike_resolution', 'nothing_happens'],
-            ['trajectory_requirement'],
-            ['discard_requirement']]:
-            self.set_field(equipped.effects, field,
-                self.get_field(equipment.effects, field))
-        return equipped
-
-    def get_field(self, obj, field):
-        for f in field:
-            if f in obj: obj = obj[f]
-            else: return None
-        return obj
-
-    def set_field(self, obj, field, value):
-        if value is None: return
-        for f in field[0:-1]:
-            if f not in obj:
-                obj[f] = {}
-            obj = obj[f]
-        obj[field[-1]] = value
-
-    def increment_field(self, obj, field, value):
-        if value is None: return
-        init_value = self.get_field(obj, field)
-        incr_value = value if init_value is None else init_value + value
-        self.set_field(obj, field, incr_value)
-
-    def can_be_played(self, card):
-        # TODO introduce abilities (card.effects) that alter can_be_played!
+    def can_be_played(self, move):
         current_player = self.current_player()
-        if card.card_type == CardType.TECHNIQUE:
-            if self.current_player_state() == PlayerState.THREATENED and card.technique_type != TechniqueType.DEFENSE:
+        move.materialize(self)
+        if move.materialized.discard_requirement + 1 > len(current_player.hand):
+            return False
+        if move.materialized.card_type == CardType.TECHNIQUE:
+            if self.current_player_state() == PlayerState.THREATENED and move.materialized.technique_type != TechniqueType.DEFENSE:
                 return False
-            if self.current_player_state() == PlayerState.INITIATIVE and card.technique_type != TechniqueType.ATTACK:
+            if self.current_player_state() == PlayerState.INITIATIVE and move.materialized.technique_type != TechniqueType.ATTACK:
                 return False
             if current_player.in_sequence():
-                for start in card.trajectory_starts:
-                    if start in current_player.sequence_head().trajectory_ends:
-                        return True
-                return False
-        elif card.card_type == CardType.ABILITY:
-            return card.requirements(self)
+                return move.materialized.can_be_chained(current_player.sequence_head().materialized)
         return True
 
-    def play(self, move):
+    def play(self, action):
         current_player = self.current_player()
-        if move.move_type == MoveType.DRAW:
+        if action.action_type == ActionType.DRAW:
             current_player.draw()
-        elif move.move_type == MoveType.REGUARD:
+            self.turn = Turn.PLAYER_1 if self.turn == Turn.PLAYER_2 else Turn.PLAYER_2
+        elif action.action_type == ActionType.REGUARD:
             current_player.reguard()
-        else: # PLAY
-            current_player.play(move)
-            pass
-        self.last_move = move
+            self.turn = Turn.PLAYER_1 if self.turn == Turn.PLAYER_2 else Turn.PLAYER_2
+        elif action.action_type == ActionType.TOUCHE:
+            current_player.touche = True
+            self.turn = Turn.PLAYER_1 if self.turn == Turn.PLAYER_2 else Turn.PLAYER_2
+        else: # ActionType.MOVE
+            if action.move.main_card.card_type == CardType.ABILITY and action.move.main_card.ability_type == AbilityType.INSTANT:
+                current_player.play_instant(action.move)
+                # discard if required
+                if action.move.main_card.discard_requirement > 0:
+                    current_player.discard_random(action.move.main_card.discard_requirement)
+                action.move.main_card.apply_effects(self)
+                self.turn = Turn.PLAYER_1 if self.turn == Turn.PLAYER_2 else Turn.PLAYER_2
+            else: # regular technique or standalone
+                action.move.materialize(self)
+                current_player.play(action.move)
+                # discard if required
+                if action.move.materialized.discard_requirement > 0:
+                    current_player.discard_random(action.move.materialized.discard_requirement)
+                if self.current_player_state() == PlayerState.THREATENED:
+                    self.strike_resolution()
+                else:
+                    self.turn = Turn.PLAYER_1 if self.turn == Turn.PLAYER_2 else Turn.PLAYER_2
+        self.last_action = action
+        self.update_properties()
+
+    def can_draw(self, valid_moves):
+        valid_attack_moves = [
+            move for move in valid_moves
+            if move.main_card.ability_type != AbilityType.INSTANT and
+            move.materialized.technique_type == TechniqueType.ATTACK
+        ]
+        return (
+            ("current_must_attack" not in self.properties or len(valid_attack_moves) == 0) and
+            self.current_player_state() != PlayerState.THREATENED and
+            self.current_player().can_draw()
+        )
+
+    def can_reguard(self, valid_moves):
+        valid_attack_moves = [
+            move for move in valid_moves
+            if move.main_card.ability_type != AbilityType.INSTANT and
+            move.materialized.technique_type == TechniqueType.ATTACK
+        ]
+        return (
+            ("current_must_attack" not in self.properties or len(valid_attack_moves) == 0) and
+            self.current_player_state() != PlayerState.THREATENED and
+            self.current_player().can_reguard()
+        )
+
+    def strike_resolution(self):
+        attack = self.other_player().sequence_head().materialized
+        defense = self.current_player().sequence_head().materialized
+        # resolve abilities
+        if "opponents_power_increment" in defense.strike_resolution:
+            attack.power += defense.strike_resolution["opponents_power_increment"]
+        if "power_increment" in defense.strike_resolution:
+            defense.power += defense.strike_resolution["power_increment"]
+        if "power_increment" in attack.strike_resolution:
+            attack.power += attack.strike_resolution["power_increment"]
+        if "nothing_happens" in defense.strike_resolution:
+            self.turn = Turn.PLAYER_1 if self.turn == Turn.PLAYER_2 else Turn.PLAYER_2
+            return
+        # prevent power < 1
+        if attack.power < 1: attack.power = 1
+        if defense.power < 1: defense.power = 1
+        # calculate score and next turn
+        if attack.power >= defense.power:
+            self.other_player().score += attack.power - defense.power
+            self.turn = Turn.PLAYER_1 if self.turn == Turn.PLAYER_2 else Turn.PLAYER_2
+
+    def deduplicated(self, items):
+        _deduplicated = []
+        for item in items:
+            if item not in _deduplicated:
+                _deduplicated.append(item)
+        return _deduplicated
+
+    def update_properties(self):
+        if "current_must_attack" in self.properties:
+            del self.properties["current_must_attack"]
+        if "opponent_must_attack" in self.properties:
+            self.properties["current_must_attack"] = True
+            del self.properties["opponent_must_attack"]

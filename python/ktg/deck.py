@@ -38,3 +38,6 @@ class Deck(object):
             self.cards.remove(chosen)
             return chosen
         else: return None
+
+    def reshuffle(self, cards):
+        self.cards.extend(cards)

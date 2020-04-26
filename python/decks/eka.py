@@ -8,6 +8,31 @@ from itertools import chain
 from copy import copy
 
 
+def equip_zone_out(technique):
+    technique_copy = copy(technique)
+    if "opponents_power_increment" not in technique_copy.strike_resolution:
+        technique_copy.strike_resolution["opponents_power_increment"] = 0
+    technique_copy.strike_resolution["opponents_power_increment"] += -2
+    return technique_copy
+
+def equip_flick_of_the_wrist(technique):
+    technique_copy = copy(technique)
+    if "power_increment" not in technique_copy.strike_resolution:
+        technique_copy.strike_resolution["power_increment"] = 0
+    technique_copy.strike_resolution["power_increment"] += 1
+    return technique_copy
+
+def equip_torque(technique):
+    technique_copy = copy(technique)
+    if "power_increment" not in technique_copy.strike_resolution:
+        technique_copy.strike_resolution["power_increment"] = 0
+    technique_copy.strike_resolution["power_increment"] += 2
+    return technique_copy
+
+def apply_effects_invite(game):
+    game.properties["opponent_must_attack"] = True
+
+
 deck = Deck(
     'Eka',
     list(chain(
@@ -111,45 +136,29 @@ deck = Deck(
             name="Zone out",
             type=AbilityType.EQUIPMENT,
             text="Equip a defense card. Increase its power by 2.",
-            requirements=lambda t: t.technique_type == TechniqueType.DEFENSE,
-            effects={
-                "strike_resolution": {
-                    "opponents_power_increment": -2
-                }
-            }
+            can_equip=lambda t: t.technique_type == TechniqueType.DEFENSE,
+            equip=equip_zone_out
         ) * 2,
         Card.new_ability(
             name="Flick of the wrist",
             type=AbilityType.EQUIPMENT,
             text="Equip a technique card. Increase its power by 1.",
-            requirements=lambda t: True,
-            effects={
-                "strike_resolution": {
-                    "power_increment": +1
-                }
-            }
+            can_equip=lambda t: True,
+            equip=equip_flick_of_the_wrist
         ) * 2,
         Card.new_ability(
             name="Torque",
             type=AbilityType.EQUIPMENT,
             text="Equip an attack card. Increase its power by 2.",
-            requirements=lambda t: t.technique_type == TechniqueType.ATTACK,
-            effects={
-                "strike_resolution": {
-                    "power_increment": +2
-                }
-            }
+            can_equip=lambda t: t.technique_type == TechniqueType.ATTACK,
+            equip=equip_torque
         ) * 2,
         Card.new_ability(
             name="Invite",
-            type=AbilityType.STANDALONE,
+            type=AbilityType.INSTANT,
             text="Play only if you are not threatened. If your opponent has playable attacks, they must attack next turn.",
-            requirements=lambda g: g.current_player_state() == PlayerState.INITIATIVE,
-            effects={
-                "opponents_next_turn": {
-                    "must_attack": True
-                }
-            }
+            can_be_played=lambda g: g.current_player_state() == PlayerState.INITIATIVE,
+            apply_effects=apply_effects_invite
         ) * 2
     ))
 )
