@@ -4,4 +4,4 @@
 import importlib
 import sys
 
-print(importlib.import_module(sys.argv[1]).deck)
+print(importlib.import_module("decks." + sys.argv[1]).deck)

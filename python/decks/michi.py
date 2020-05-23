@@ -6,6 +6,7 @@ from ktg.deck import Deck
 from ktg.player import PlayerState
 from itertools import chain
 from copy import copy
+from math import ceil
 
 
 def equip_flow(technique):
@@ -17,7 +18,7 @@ def equip_explode(technique):
     technique_copy = copy(technique)
     if "power_increment" not in technique_copy.strike_resolution:
         technique_copy.strike_resolution["power_increment"] = 0
-    technique_copy.strike_resolution["power_increment"] += 3
+    technique_copy.strike_resolution["power_increment"] += 2
     technique_copy.discard_requirement += 1
     return technique_copy
 
@@ -47,7 +48,7 @@ def materialize_technique_blade_push(game):
         game.current_player().sequence_head().main_card.technique_type == TechniqueType.ATTACK
     )
     if can_be_played:
-        power = game.current_player().sequence_head().main_card.power / 2
+        power = int(ceil(float(game.current_player().sequence_head().main_card.power) / 2))
     else: power = 0
     return Card.new_technique(
         name="Blade push",
@@ -162,14 +163,14 @@ deck = Deck(
         Card.new_ability(
             name="Flow",
             type=AbilityType.EQUIPMENT,
-            text="Equip any technique card. That card can be played regardless of any trajectory requirement.",
-            can_equip=lambda t: True,
+            text="Equip any technique card with power 4 or less. That card can be played regardless of any trajectory requirement.",
+            can_equip=lambda t: t.power <= 4,
             equip=equip_flow
         ) * 2,
         Card.new_ability(
             name="Explode",
             type=AbilityType.EQUIPMENT,
-            text="Equip a technique card. When you play it, you have to discard 1 card at random. If you can not discard 1 card, you can not play 'Explode'. Increase the technique's power by 3.",
+            text="Equip a technique card. When you play it, you have to discard 1 card at random. If you can not discard 1 card, you can not play 'Explode'. Increase the technique's power by 2.",
             can_equip=lambda t: True,
             equip=equip_explode
         ) * 2,
@@ -182,7 +183,7 @@ deck = Deck(
         Card.new_ability(
             name="Blade push",
             type=AbilityType.STANDALONE,
-            text="You can play this card if you played an attack on your last turn. This card becomes a copy of that attack, but its power is reduced by half (rounding down).",
+            text="You can play this card if you played an attack on your last turn. This card becomes a copy of that attack, but its power is reduced by half (rounding up).",
             materialize_technique=materialize_technique_blade_push
         ) * 2
     ))

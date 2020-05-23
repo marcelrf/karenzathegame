@@ -4,6 +4,7 @@ from ktg.hand import Hand
 from ktg.card import Card
 from copy import copy
 from enum import Enum
+from collections import defaultdict
 import random
 
 
@@ -19,18 +20,20 @@ class Player(object):
         self.discards = []
         self.hand = Hand()
         self.sequence = []
-        self.last_move = None
         self.score = 0
         self.touche = False
+        self.played_cards = defaultdict(lambda: 0)
+        self.discarded_cards = defaultdict(lambda: 0)
 
     def __copy__(self):
         other = Player(copy(self.deck))
         other.discards = [copy(c) for c in self.discards]
         other.hand = copy(self.hand)
         other.sequence = [copy(c) for c in self.sequence]
-        other.last_move = copy(self.last_move)
         other.score = self.score
         other.touche = self.touche
+        other.played_cards = copy(self.played_cards)
+        other.discarded_cards = copy(self.discarded_cards)
         return other
 
     def can_draw(self, cards=1):
@@ -47,10 +50,13 @@ class Player(object):
     def discard(self, card):
         self.hand.remove(card)
         self.discards.append(card)
+        self.discarded_cards[card.name] += 1
 
     def discard_at(self, index):
-        self.discards.append(self.hand.cards[index])
+        card = self.hand.cards[index]
+        self.discards.append(card)
         del self.hand.cards[index]
+        self.discarded_cards[card.name] += 1
 
     def discard_random(self, number):
         for i in range(number):
@@ -77,12 +83,14 @@ class Player(object):
     def play(self, move):
         for card in move.cards():
             self.hand.remove(card)
+            self.played_cards[card.name] += 1
         self.sequence.append(move)
 
     def play_instant(self, move):
         for card in move.cards():
             self.hand.remove(card)
             self.discards.append(card)
+            self.played_cards[card.name] += 1
 
     def main_info_str(self, state):
         normalize = lambda s, l: s + ' ' * (l - len(s)) if len(s) < l else s[0:l]

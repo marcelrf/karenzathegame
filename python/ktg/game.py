@@ -140,7 +140,11 @@ class Game(object):
 
     def play(self, action):
         current_player = self.current_player()
-        if action.action_type == ActionType.DRAW:
+        if action.action_type == ActionType.PASS:
+            if len(current_player.hand) > 0:
+                current_player.discard_random(1)
+            self.turn = Turn.PLAYER_1 if self.turn == Turn.PLAYER_2 else Turn.PLAYER_2
+        elif action.action_type == ActionType.DRAW:
             current_player.draw()
             self.turn = Turn.PLAYER_1 if self.turn == Turn.PLAYER_2 else Turn.PLAYER_2
         elif action.action_type == ActionType.REGUARD:
@@ -178,7 +182,7 @@ class Game(object):
             move.materialized.technique_type == TechniqueType.ATTACK
         ]
         return (
-            ("current_must_attack" not in self.properties or len(valid_attack_moves) == 0) and
+            "current_must_attack" not in self.properties and
             self.current_player_state() != PlayerState.THREATENED and
             self.current_player().can_draw()
         )
@@ -190,12 +194,14 @@ class Game(object):
             move.materialized.technique_type == TechniqueType.ATTACK
         ]
         return (
-            ("current_must_attack" not in self.properties or len(valid_attack_moves) == 0) and
+            "current_must_attack" not in self.properties and
             self.current_player_state() != PlayerState.THREATENED and
             self.current_player().can_reguard()
         )
 
     def strike_resolution(self):
+        current_turn = self.turn
+        other_turn = Turn.PLAYER_1 if current_turn == Turn.PLAYER_2 else Turn.PLAYER_2
         attack = self.other_player().sequence_head().materialized
         defense = self.current_player().sequence_head().materialized
         # resolve abilities
@@ -205,18 +211,31 @@ class Game(object):
             defense.power += defense.strike_resolution["power_increment"]
         if "power_increment" in attack.strike_resolution:
             attack.power += attack.strike_resolution["power_increment"]
-        if "nothing_happens" in defense.strike_resolution:
-            self.turn = Turn.PLAYER_1 if self.turn == Turn.PLAYER_2 else Turn.PLAYER_2
-            return
         if "extra_score" in defense.strike_resolution:
             self.current_player().score += defense.strike_resolution["extra_score"]
-        # prevent power < 1
-        if attack.power < 1: attack.power = 1
-        if defense.power < 1: defense.power = 1
-        # calculate score and next turn
-        if attack.power >= defense.power:
-            self.other_player().score += attack.power - defense.power
-            self.turn = Turn.PLAYER_1 if self.turn == Turn.PLAYER_2 else Turn.PLAYER_2
+        if "auto_reguard" in defense.strike_resolution:
+            self.current_player().reguard()
+        if "auto_reguard" in attack.strike_resolution:
+            self.other_player().reguard()
+        if "opponent_discard" in attack.strike_resolution:
+            cards_to_discard = min(
+                attack.strike_resolution["opponent_discard"],
+                len(self.current_player().hand))
+            self.current_player().discard_random(cards_to_discard)
+        if ("nothing_happens" in defense.strike_resolution or
+            "nothing_happens" in attack.strike_resolution):
+            self.turn = other_turn
+        else:
+            # prevent power < 1
+            if attack.power < 1: attack.power = 1
+            if defense.power < 1: defense.power = 1
+            # calculate score and next turn
+            if attack.power >= defense.power:
+                self.other_player().score += attack.power - defense.power
+                self.turn = other_turn
+        if "play_next_turn" in defense.strike_resolution:
+            self.turn = current_turn
+
 
     def deduplicated(self, items):
         _deduplicated = []

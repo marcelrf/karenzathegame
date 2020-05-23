@@ -8,7 +8,8 @@ class ActionType(Enum):
     DRAW = 1
     MOVE = 2
     REGUARD = 3
-    TOUCHE = 4
+    PASS = 4
+    TOUCHE = 5
 
 
 class Action(object):
@@ -41,3 +42,5 @@ class Action(object):
             return "Reguard"
         if self.action_type == ActionType.TOUCHE:
             return "Touche"
+        if self.action_type == ActionType.PASS:
+            return "Pass"

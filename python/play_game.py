@@ -3,18 +3,21 @@ import importlib
 from ktg.player import Player, PlayerState
 from ktg.game import Game, Turn, INITIAL_CARDS_IN_HAND
 from ktg.action import Action, ActionType
+from collections import defaultdict
 from copy import copy
 import sys
 import random
 
 
 LOWEST_SCORE = -999999999
-MIN_MAX_DEPTH = 3
+
+MIN_MAX_DEPTH = 4
+PROB_MIN_MAX_RESHUFFLES = 3
 DISCARD_MIN_MAX_DEPTH = 1
+MIN_MAX_DRAW_SAMPLE = 2
+
 EN_GARDE_SCORE = 2
 INITIATIVE_SCORE = 2
-MIN_MAX_DRAW_SAMPLE = 3
-PROB_MIN_MAX_RESHUFFLES = 3
 
 
 def evaluate(game):
@@ -62,10 +65,13 @@ def prob_min_max(game, depth):
         if gc.can_reguard(valid_moves):
             valid_actions.append(Action(ActionType.REGUARD))
         if len(valid_actions) == 0:
-            valid_actions = [Action(ActionType.TOUCHE)]
+            if game.current_player_state() == PlayerState.INITIATIVE:
+                valid_actions = [Action(ActionType.PASS)]
+            else:
+                valid_actions = [Action(ActionType.TOUCHE)]
         for action in valid_actions:
             total_action_count += 1
-            #print('=='*(3-depth) + 'trying action: %s' % str(action))
+            # print('=='*(3-depth) + 'trying action: %s' % str(action))
             if action.action_type == ActionType.DRAW:
                 draw_score = 0
                 for i in range(MIN_MAX_DRAW_SAMPLE):
@@ -83,10 +89,12 @@ def prob_min_max(game, depth):
                 if next_turn == current_turn:
                     action_score = prob_min_max(gc3, depth - 1)
                 else:
+                    if len(gc3.other_player().hand) > INITIAL_CARDS_IN_HAND:
+                        gc3.other_player().discard_random(1)
                     action_score = -min_max(gc3, depth - 1)
             total_score += action_score
     normalized_score = total_score / float(total_action_count)
-    #print('=='*(3-depth) + 'prob_min_max(%s,%d) -----> %d' % (game.current_player().deck.character, depth, normalized_score))
+    # print('=='*(3-depth) + 'prob_min_max(%s,%d) -----> %d' % (game.current_player().deck.character, depth, normalized_score))
     return normalized_score
 
 
@@ -109,10 +117,13 @@ def min_max(game, depth):
     if game.can_reguard(valid_moves):
         valid_actions.append(Action(ActionType.REGUARD))
     if len(valid_actions) == 0:
-        valid_actions = [Action(ActionType.TOUCHE)]
+        if game.current_player_state() == PlayerState.INITIATIVE:
+            valid_actions = [Action(ActionType.PASS)]
+        else:
+            valid_actions = [Action(ActionType.TOUCHE)]
     best_score = LOWEST_SCORE
     for action in valid_actions:
-        #print('**'*(3-depth) + 'trying action: %s' % str(action))
+        # print('**'*(3-depth) + 'trying action: %s' % str(action))
         if action.action_type == ActionType.DRAW:
             draw_score = 0
             for i in range(MIN_MAX_DRAW_SAMPLE):
@@ -130,17 +141,19 @@ def min_max(game, depth):
             if next_turn == current_turn:
                 action_score = min_max(gc2, depth - 1)
             else:
+                if len(gc2.other_player().hand) > INITIAL_CARDS_IN_HAND:
+                    gc2.other_player().discard_random(1)
                 action_score = -prob_min_max(gc2, depth - 1)
         if action_score > best_score:
             best_score = action_score
-    #print('**'*(3-depth) + 'min_max(%s,%d) -------> %d' % (game.current_player().deck.character, depth, best_score))
+    # print('**'*(3-depth) + 'min_max(%s,%d) -------> %d' % (game.current_player().deck.character, depth, best_score))
     return best_score
 
 
 def play_game(player_1, player_2, player_types):
     g = Game(player_1, player_2)
     while not g.is_over():
-        # print(g)
+        print(g)
         valid_moves = g.get_valid_moves()
         if player_types[g.turn] == "human":
             index = 0
@@ -151,16 +164,18 @@ def play_game(player_1, player_2, player_types):
                 choice = raw_input("Choose: ")
                 if choice == 'd' and g.can_draw(valid_moves): break
                 elif choice == 'r' and g.can_reguard(valid_moves): break
+                elif choice == 'p' and len(valid_moves) == 0 and g.current_player_state() == PlayerState.INITIATIVE: break
                 elif choice == 't' and g.current_player_state() == PlayerState.THREATENED and len(valid_moves) == 0: break
                 elif choice.isdigit() and int(choice) >= 0 and int(choice) < len(valid_moves): break
             if choice == 'd':
                 g.play(Action(ActionType.DRAW))
-                if len(g.other_player().hand) > INITIAL_CARDS_IN_HAND:
-                    choice = raw_input("Discard: ")
-                    g.other_player().discard_at(int(choice))
             elif choice == 'r': g.play(Action(ActionType.REGUARD))
+            elif choice == 'p': g.play(Action(ActionType.PASS))
             elif choice == 't': g.play(Action(ActionType.TOUCHE))
             else: g.play(Action(ActionType.MOVE, valid_moves[int(choice)]))
+            while len(g.other_player().hand) > INITIAL_CARDS_IN_HAND:
+                choice = raw_input("Discard: ")
+                g.other_player().discard_at(int(choice))
 
         elif player_types[g.turn] == "computer":
             # collect valid actions
@@ -170,7 +185,10 @@ def play_game(player_1, player_2, player_types):
             if g.can_reguard(valid_moves):
                 valid_actions.append(Action(ActionType.REGUARD))
             if len(valid_actions) == 0:
-                valid_actions = [Action(ActionType.TOUCHE)]
+                if g.current_player_state() == PlayerState.INITIATIVE:
+                    valid_actions = [Action(ActionType.PASS)]
+                else:
+                    valid_actions = [Action(ActionType.TOUCHE)]
             # find best action
             if len(valid_actions) == 1:
                 best_action = valid_actions[0]
@@ -195,15 +213,17 @@ def play_game(player_1, player_2, player_types):
                         if next_turn == current_turn:
                             action_score = min_max(gc2, MIN_MAX_DEPTH)
                         else:
+                            while len(gc2.other_player().hand) > INITIAL_CARDS_IN_HAND:
+                                gc2.other_player().discard_random(1)
                             action_score = -prob_min_max(gc2, MIN_MAX_DEPTH)
                     # print(str(action) + " " + str(action_score))
                     if action_score > best_score:
                         best_score = action_score
                         best_action = action
-            # print(g.current_player().deck.character + " " + str(best_action))
+            print(g.current_player().deck.character + " " + str(best_action))
             g.play(best_action)
             # if necessary choose what to discard
-            if len(g.other_player().hand) > INITIAL_CARDS_IN_HAND:
+            while len(g.other_player().hand) > INITIAL_CARDS_IN_HAND:
                 best_discard, best_score = None, LOWEST_SCORE
                 for card in g.other_player().hand.cards:
                     gc3 = copy(g)
@@ -214,9 +234,7 @@ def play_game(player_1, player_2, player_types):
                         best_score = discard_score
                         best_discard = card
                 g.other_player().discard(best_discard)
-
-    if g.winner() is None: print("THE GAME IS A DRAW!")
-    else: print("THE WINNER IS: %s!" % g.winner().deck.character)
+    return g.winner()
 
 
 if __name__ == '__main__':
@@ -227,6 +245,53 @@ if __name__ == '__main__':
     player_types = {}
     player_types[Turn.PLAYER_1] = sys.argv[2]
     player_types[Turn.PLAYER_2] = sys.argv[4]
-    for i in range(100):
-        play_game(copy(player_1), copy(player_2), player_types)
-        play_game(copy(player_2), copy(player_1), player_types)
+    wins = {
+        player_1.deck.character: 0,
+        player_2.deck.character: 0
+    }
+    usage_stats_player_1, usage_stats_player_2 = defaultdict(lambda: 0), defaultdict(lambda: 0)
+    discard_stats_player_1, discard_stats_player_2 = defaultdict(lambda: 0), defaultdict(lambda: 0)
+    winning_actions_player_1, winning_actions_player_2 = defaultdict(lambda: 0), defaultdict(lambda: 0)
+    for i in range(500):
+        for setup in ["home", "away"]:
+            player_1_copy, player_2_copy = copy(player_1), copy(player_2)
+            if setup == "home":
+                winner = play_game(player_1_copy, player_2_copy, player_types)
+            elif setup == "away":
+                winner = play_game(player_2_copy, player_1_copy, player_types)
+            for k, v in player_1_copy.played_cards.items():
+                usage_stats_player_1[k] += v
+            for k, v in player_2_copy.played_cards.items():
+                usage_stats_player_2[k] += v
+            for k, v in player_1_copy.discarded_cards.items():
+                discard_stats_player_1[k] += v
+            for k, v in player_2_copy.discarded_cards.items():
+                discard_stats_player_2[k] += v
+            if winner is None:
+                print("THE GAME IS A DRAW!")
+            else:
+                # if winner == player_1_copy:
+                #     winning_actions_player_1[str(player_1_copy.last_action)] += 1
+                # if winner == player_2_copy:
+                #     winning_actions_player_2[str(player_2_copy.last_action)] += 1
+                wins[winner.deck.character] += 1
+                print("THE WINNER IS: %s! (%s)" % (winner.deck.character, str(wins)))
+    print(wins)
+    print("###### USAGE OF %s:" % player_1.deck.character)
+    for k, v in sorted(usage_stats_player_1.items(), key=lambda p: -p[1]):
+        print(k, v)
+    print("###### USAGE OF %s:" % player_2.deck.character)
+    for k, v in sorted(usage_stats_player_2.items(), key=lambda p: -p[1]):
+        print(k, v)
+    print("###### DISCARDS OF %s:" % player_1.deck.character)
+    for k, v in sorted(discard_stats_player_1.items(), key=lambda p: -p[1]):
+        print(k, v)
+    print("###### DISCARDS OF %s:" % player_2.deck.character)
+    for k, v in sorted(discard_stats_player_2.items(), key=lambda p: -p[1]):
+        print(k, v)
+    print("$$$$$$ Winning actions of %s" % player_1.deck.character)
+    for k, v in sorted(winning_actions_player_1.items(), key=lambda p: -p[1]):
+        print(k, v)
+    print("$$$$$$ Winning actions of %s" % player_2.deck.character)
+    for k, v in sorted(winning_actions_player_2.items(), key=lambda p: -p[1]):
+        print(k, v)
