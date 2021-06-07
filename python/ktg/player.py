@@ -41,8 +41,11 @@ class Player(object):
 
     def draw(self, cards=1):
         for i in range(cards):
-            card = self.deck.draw()
-            self.hand.add(card)
+            if self.can_draw():
+                card = self.deck.draw()
+                self.hand.add(card)
+            else:
+                break
 
     def should_discard(self):
         return len(self.hand) > 7

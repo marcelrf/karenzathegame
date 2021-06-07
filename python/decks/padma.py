@@ -35,15 +35,15 @@ deck = Deck(
     'Padma',
     list(chain(
         Card.new_technique(
-            name="Leaf slap",
+            name="Slap",
             type=TechniqueType.ATTACK,
-            subtype=TechniqueSubtype.HIT,
+            subtype=TechniqueSubtype.SLASH,
             trajectory_starts=[SwordPosition.TOP_RIGHT],
             trajectory_ends=[SwordPosition.TOP_LEFT],
             power=1
         ) * 2,
         Card.new_technique(
-            name="Open lotus",
+            name="Opening lotus",
             type=TechniqueType.ATTACK,
             subtype=TechniqueSubtype.SLASH,
             trajectory_starts=[SwordPosition.TOP_LEFT],
@@ -59,9 +59,9 @@ deck = Deck(
             power=2
         ) * 2,
         Card.new_technique(
-            name="Trunc weight",
+            name="Hurricane",
             type=TechniqueType.ATTACK,
-            subtype=TechniqueSubtype.SLASH,
+            subtype=TechniqueSubtype.HIT,
             trajectory_starts=[SwordPosition.TOP_LEFT],
             trajectory_ends=[SwordPosition.BOTTOM_RIGHT],
             power=7
@@ -69,23 +69,23 @@ deck = Deck(
         Card.new_technique(
             name="Rose sting",
             type=TechniqueType.ATTACK,
-            subtype=TechniqueSubtype.HIT,
+            subtype=TechniqueSubtype.THRUST,
             trajectory_starts=[SwordPosition.TOP_LEFT],
             trajectory_ends=[SwordPosition.TOP_RIGHT],
             power=4
         ) * 2,
         Card.new_technique(
-            name="Growing stem",
+            name="Growth",
             type=TechniqueType.ATTACK,
-            subtype=TechniqueSubtype.THRUST,
+            subtype=TechniqueSubtype.SLASH,
             trajectory_starts=[SwordPosition.BOTTOM_LEFT],
             trajectory_ends=[SwordPosition.TOP_RIGHT],
             power=5
         ) * 2,
         Card.new_technique(
-            name="Blocking petal",
+            name="Deflecting petal",
             type=TechniqueType.DEFENSE,
-            subtype=TechniqueSubtype.SHIELD,
+            subtype=TechniqueSubtype.DEFLECT,
             trajectory_starts=[SwordPosition.BOTTOM_LEFT],
             trajectory_ends=[SwordPosition.TOP_RIGHT],
             power=3
@@ -99,17 +99,17 @@ deck = Deck(
             power=1
         ) * 2,
         Card.new_technique(
-            name="Flexible cane",
+            name="Flexible shield",
             type=TechniqueType.DEFENSE,
-            subtype=TechniqueSubtype.DEFLECT,
+            subtype=TechniqueSubtype.SHIELD,
             trajectory_starts=[SwordPosition.TOP_RIGHT],
             trajectory_ends=[SwordPosition.TOP_LEFT],
             power=1
         ) * 2,
         Card.new_technique(
-            name="Caring sunflower",
+            name="Sunflower",
             type=TechniqueType.DEFENSE,
-            subtype=TechniqueSubtype.SHIELD,
+            subtype=TechniqueSubtype.ABSORB,
             trajectory_starts=[SwordPosition.TOP_LEFT],
             trajectory_ends=[SwordPosition.TOP_RIGHT],
             power=2
@@ -117,13 +117,13 @@ deck = Deck(
         Card.new_technique(
             name="Vine curtain",
             type=TechniqueType.DEFENSE,
-            subtype=TechniqueSubtype.DEFLECT,
+            subtype=TechniqueSubtype.SHIELD,
             trajectory_starts=[SwordPosition.TOP_LEFT],
             trajectory_ends=[SwordPosition.BOTTOM_RIGHT],
             power=6
         ) * 2,
         Card.new_technique(
-            name="Branch whip",
+            name="Whip",
             type=TechniqueType.DEFENSE,
             subtype=TechniqueSubtype.DEFLECT,
             trajectory_starts=[SwordPosition.BOTTOM_LEFT],

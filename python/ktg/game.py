@@ -204,9 +204,18 @@ class Game(object):
         other_turn = Turn.PLAYER_1 if current_turn == Turn.PLAYER_2 else Turn.PLAYER_2
         attack = self.other_player().sequence_head().materialized
         defense = self.current_player().sequence_head().materialized
+        # apply counter equipments
+        if ("counter_opponents_equipments" in defense.strike_resolution and
+            len(self.other_player().sequence_head().equipments) > 0):
+            attack.strike_resolution = {}
+        if ("counter_opponents_equipments" in attack.strike_resolution and
+            len(self.current_player().sequence_head().equipments) > 0):
+            defense.strike_resolution = {}
         # resolve abilities
         if "opponents_power_increment" in defense.strike_resolution:
             attack.power += defense.strike_resolution["opponents_power_increment"]
+        if "opponents_power_increment" in attack.strike_resolution:
+            defense.power += attack.strike_resolution["opponents_power_increment"]
         if "power_increment" in defense.strike_resolution:
             defense.power += defense.strike_resolution["power_increment"]
         if "power_increment" in attack.strike_resolution:

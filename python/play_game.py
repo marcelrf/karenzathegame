@@ -11,7 +11,7 @@ import random
 
 LOWEST_SCORE = -999999999
 
-MIN_MAX_DEPTH = 4
+MIN_MAX_DEPTH = 3
 PROB_MIN_MAX_RESHUFFLES = 3
 DISCARD_MIN_MAX_DEPTH = 1
 MIN_MAX_DRAW_SAMPLE = 2
@@ -153,7 +153,7 @@ def min_max(game, depth):
 def play_game(player_1, player_2, player_types):
     g = Game(player_1, player_2)
     while not g.is_over():
-        print(g)
+        # print(g)
         valid_moves = g.get_valid_moves()
         if player_types[g.turn] == "human":
             index = 0
@@ -220,7 +220,7 @@ def play_game(player_1, player_2, player_types):
                     if action_score > best_score:
                         best_score = action_score
                         best_action = action
-            print(g.current_player().deck.character + " " + str(best_action))
+            # print(g.current_player().deck.character + " " + str(best_action))
             g.play(best_action)
             # if necessary choose what to discard
             while len(g.other_player().hand) > INITIAL_CARDS_IN_HAND:

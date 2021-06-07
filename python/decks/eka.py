@@ -139,7 +139,7 @@ deck = Deck(
         Card.new_ability(
             name="Zone out",
             type=AbilityType.EQUIPMENT,
-            text="Equip a defense card. Increase its power by 3. Draw a card.",
+            text="Equip a defense card. Decrease the power of the blocked attack by 3. Draw a card.",
             can_equip=lambda t: t.technique_type == TechniqueType.DEFENSE,
             equip=equip_zone_out
         ) * 2,
@@ -160,7 +160,7 @@ deck = Deck(
         Card.new_ability(
             name="Invite",
             type=AbilityType.INSTANT,
-            text="Play only if you are not threatened. If your opponent has playable attacks, they must attack next turn. If not, they skip their turn and you randomly discard one card off their hand.",
+            text="Play only if you are not threatened. If your opponent has playable attacks, they must attack next turn. If they can not, they skip their turn.",
             can_be_played=lambda g: g.current_player_state() == PlayerState.INITIATIVE,
             apply_effects=apply_effects_invite
         ) * 2
