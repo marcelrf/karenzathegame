@@ -97,7 +97,7 @@ deck = Deck(
             power=4
         ) * 2,
         Card.new_technique(
-            name="Rainbow",
+            name="Umbrella",
             type=TechniqueType.DEFENSE,
             subtype=TechniqueSubtype.SHIELD,
             trajectory_starts=[SwordPosition.BOTTOM_LEFT],
